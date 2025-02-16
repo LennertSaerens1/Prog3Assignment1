@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include "Transform.h"
+#include "iostream"
 
 namespace dae
 {
@@ -14,7 +15,6 @@ namespace dae
 		virtual void FixedUpdate(const float fixedTime);
 		virtual void Render() const;
 
-		void SetTexture(const std::string& filename);
 		void SetPosition(float x, float y);
 
 		GameObject() = default;

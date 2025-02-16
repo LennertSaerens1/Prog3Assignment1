@@ -40,7 +40,7 @@ void dae::TextComponent::Render(float x, float y) const
 {
 	if (m_textTexture != nullptr)
 	{
-		Renderer::GetInstance().RenderTexture(*m_textTexture, x, py);
+		Renderer::GetInstance().RenderTexture(*m_textTexture, x, y);
 	}
 }
 

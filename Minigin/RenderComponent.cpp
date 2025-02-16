@@ -1,0 +1,35 @@
+#include "RenderComponent.h"
+#include "Renderer.h"
+#include "ResourceManager.h"
+
+void RenderComponent::Update(const float deltaTime)
+{
+	deltaTime;
+}
+
+void RenderComponent::FixedUpdate(const float fixedTime)
+{
+	fixedTime;
+}
+
+void RenderComponent::Render(float x, float y) const
+{
+	if (m_Texture != nullptr)
+	{
+		dae::Renderer::GetInstance().RenderTexture(*m_Texture, x, y);
+	}
+}
+
+void RenderComponent::SetTexture(const std::string& filePath)
+{
+	if (m_Texture == nullptr)
+	{
+		m_Texture = dae::ResourceManager::GetInstance().LoadTexture(filePath);
+	}
+	else
+	{
+		m_Texture.reset();
+		m_Texture = dae::ResourceManager::GetInstance().LoadTexture(filePath);
+	}
+	
+}
