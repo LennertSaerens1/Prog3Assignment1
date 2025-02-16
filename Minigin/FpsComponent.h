@@ -5,8 +5,9 @@
 #include "Font.h"
 #include "Texture2D.h"
 
-class FpsComponent : private Component
+class FpsComponent : public Component
 {
+public:
 	void Update(const float deltaTime) override;
 	void FixedUpdate(const float fixedTime) override;
 	void Render(float x, float y) const override;

@@ -5,15 +5,17 @@
 #include "Transform.h"
 #include "Font.h"
 
-class RenderComponent : private Component
+class RenderComponent : public Component
 {
+public:
 	void Update(const float deltaTime) override;
 	void FixedUpdate(const float fixedTime) override;
 	void Render(float x, float y) const override;
 
 	void SetTexture(const std::string& filePath);
 
-	RenderComponent(const std::string& text, std::shared_ptr<dae::Font> font);
+	RenderComponent();
+	RenderComponent(const std::string& filePath);
 	virtual ~RenderComponent() = default;
 	RenderComponent(const RenderComponent& other) = delete;
 	RenderComponent(RenderComponent&& other) = delete;

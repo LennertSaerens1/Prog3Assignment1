@@ -2,6 +2,7 @@
 #include <memory>
 #include "Transform.h"
 #include "iostream"
+#include "Component.h"
 
 namespace dae
 {
@@ -27,6 +28,8 @@ namespace dae
         template <typename T, typename... Args>
         void AddComponent(Args&&... args) {
             // Create and add a new component to the vector
+            static_assert(std::is_base_of<Component, T>::value, "T must derive from Component");
+
             m_Components.push_back(std::make_unique<T>(std::forward<Args>(args)...));
         }
 
@@ -72,6 +75,6 @@ namespace dae
 
 	private:
 		Transform m_transform{};
-        std::vector<Component*> m_Components;  // Store components
+        std::vector< std::unique_ptr<Component>> m_Components;  // Store components
 	};
 }

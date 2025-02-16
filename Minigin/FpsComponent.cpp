@@ -2,6 +2,15 @@
 #include <SDL_ttf.h>
 #include "Renderer.h"
 
+
+FpsComponent::FpsComponent()
+	: m_Fps(0)
+	, m_text("FPS: 0")
+	, m_font(std::make_shared<dae::Font>("../Data/Lingua.otf", 36))
+	, m_textTexture(nullptr)
+{
+}
+
 void FpsComponent::Update(const float deltaTime)
 {
     m_Fps = 1.0 / deltaTime;

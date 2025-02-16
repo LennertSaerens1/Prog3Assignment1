@@ -2,6 +2,18 @@
 #include "Renderer.h"
 #include "ResourceManager.h"
 
+RenderComponent::RenderComponent()
+	: m_needsUpdate(false)
+	, m_Texture(nullptr)
+{
+}
+
+RenderComponent::RenderComponent(const std::string& filePath)
+	: m_needsUpdate(false)
+{
+	m_Texture = dae::ResourceManager::GetInstance().LoadTexture(filePath);
+}
+
 void RenderComponent::Update(const float deltaTime)
 {
 	deltaTime;
