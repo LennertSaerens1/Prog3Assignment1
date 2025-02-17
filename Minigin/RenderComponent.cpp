@@ -2,29 +2,31 @@
 #include "Renderer.h"
 #include "ResourceManager.h"
 
-RenderComponent::RenderComponent()
-	: m_needsUpdate(false)
+dae::RenderComponent::RenderComponent(GameObject& owner)
+	: Component::Component(owner)
+	,m_needsUpdate(false)
 	, m_Texture(nullptr)
 {
 }
 
-RenderComponent::RenderComponent(const std::string& filePath)
-	: m_needsUpdate(false)
+dae::RenderComponent::RenderComponent(const std::string& filePath, GameObject& owner)
+	: Component::Component(owner)
+	, m_needsUpdate(false)
 {
 	m_Texture = dae::ResourceManager::GetInstance().LoadTexture(filePath);
 }
 
-void RenderComponent::Update(const float deltaTime)
+void dae::RenderComponent::Update(const float )
 {
-	deltaTime;
+	
 }
 
-void RenderComponent::FixedUpdate(const float fixedTime)
+void dae::RenderComponent::FixedUpdate(const float )
 {
-	fixedTime;
+	
 }
 
-void RenderComponent::Render(float x, float y) const
+void dae::RenderComponent::Render(float x, float y) const
 {
 	if (m_Texture != nullptr)
 	{
@@ -32,7 +34,7 @@ void RenderComponent::Render(float x, float y) const
 	}
 }
 
-void RenderComponent::SetTexture(const std::string& filePath)
+void dae::RenderComponent::SetTexture(const std::string& filePath)
 {
 	if (m_Texture == nullptr)
 	{

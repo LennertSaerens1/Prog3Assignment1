@@ -96,7 +96,7 @@ void dae::Minigin::Run(const std::function<void()>& load)
 		last_time = current_time;	
 		lag += delta_time;
 
-		do_continue = input.ProcessInput();
+		do_continue = input.ProcessInput(delta_time);
 		while (lag >= fixed_time_step)
 		{
 			sceneManager.FixedUpdate(fixed_time_step);

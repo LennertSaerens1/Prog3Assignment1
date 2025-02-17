@@ -3,40 +3,58 @@
 #include "Renderer.h"
 
 
-FpsComponent::FpsComponent()
-	: m_Fps(0)
+dae::FpsComponent::FpsComponent(GameObject& owner)
+	:Component::Component(owner)
+	,m_Fps(0)
 	, m_text("FPS: 0")
 	, m_font(std::make_shared<dae::Font>("../Data/Lingua.otf", 36))
 	, m_textTexture(nullptr)
 {
+	
 }
 
-void FpsComponent::Update(const float deltaTime)
+void dae::FpsComponent::Update(const float deltaTime)
 {
-    m_Fps = 1.0 / deltaTime;
-	m_text = "FPS: " + std::to_string(m_Fps);
-}
+	m_elapsedTime += deltaTime;
 
-void FpsComponent::FixedUpdate(const float fixedTime)
-{
-	fixedTime;
-}
+	// Only update the FPS text 3 times per second
+	if (m_elapsedTime >= m_rateRefresh) {
+		m_Fps = 1.0f / deltaTime;
 
-void FpsComponent::Render(float x, float y) const
-{
-	const SDL_Color color = { 255,255,255,255 }; // only white text is supported now
-	const auto surf = TTF_RenderText_Blended(m_font->GetFont(), m_text.c_str(), color);
-	if (surf == nullptr)
-	{
-		throw std::runtime_error(std::string("Render text failed: ") + SDL_GetError());
+		// Format FPS with one decimal place
+		std::ostringstream stream;
+		stream << std::fixed << std::setprecision(1) << m_Fps;
+		m_text = stream.str() + " FPS";
+
+		// Reset elapsed time
+		m_elapsedTime -= m_rateRefresh;
+
+
+		//Optimse the rendering of text by only rendering when the text changes in update and just render it in render
+		const SDL_Color color = { 255,255,255,255 }; // only white text is supported now
+		const auto surf = TTF_RenderText_Blended(m_font->GetFont(), m_text.c_str(), color);
+		if (surf == nullptr)
+		{
+			throw std::runtime_error(std::string("Render text failed: ") + SDL_GetError());
+		}
+		auto texture = SDL_CreateTextureFromSurface(dae::Renderer::GetInstance().GetSDLRenderer(), surf);
+		if (texture == nullptr)
+		{
+			throw std::runtime_error(std::string("Create text texture from surface failed: ") + SDL_GetError());
+		}
+		SDL_FreeSurface(surf);
+		m_textTexture = std::make_shared<dae::Texture2D>(texture);
 	}
-	auto texture = SDL_CreateTextureFromSurface(dae::Renderer::GetInstance().GetSDLRenderer(), surf);
-	if (texture == nullptr)
-	{
-		throw std::runtime_error(std::string("Create text texture from surface failed: ") + SDL_GetError());
-	}
-	SDL_FreeSurface(surf);
-	m_textTexture = std::make_shared<dae::Texture2D>(texture);
+}
+
+void dae::FpsComponent::FixedUpdate(const float )
+{
+	
+}
+
+void dae::FpsComponent::Render(float x, float y) const
+{
+	
 
 	if (m_textTexture != nullptr)
 	{

@@ -18,6 +18,6 @@ namespace dae
 		Minigin& operator=(Minigin&& other) = delete;
 	private:
 		float fixed_time_step = 0.08f;
-		float ms_per_frame = 16.666666666666666666666666666667f;
+		float ms_per_frame = 16;
 	};
 }
