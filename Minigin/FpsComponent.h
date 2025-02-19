@@ -26,7 +26,7 @@ namespace dae
 		std::chrono::high_resolution_clock::time_point m_LastTime;
 		float m_Fps;
 		float m_elapsedTime;
-		const float m_rateRefresh{ (1.0f / 5.0f) };
+		const float m_rateRefresh{ (1.0f / 10.0f) };
 		std::string m_text;
 		std::shared_ptr<dae::Font> m_font;
 		mutable std::shared_ptr<dae::Texture2D> m_textTexture;
