@@ -8,7 +8,7 @@ namespace dae
 {
 	class Font;
 	class Texture2D;
-	class TextComponent final : public Component
+	class TextComponent : public Component
 	{
 	public:
 		void Update(const float deltaTime) override;
@@ -23,7 +23,7 @@ namespace dae
 		TextComponent(TextComponent&& other) = delete;
 		TextComponent& operator=(const TextComponent& other) = delete;
 		TextComponent& operator=(TextComponent&& other) = delete;
-	private:
+	protected:
 		bool m_needsUpdate;
 		std::string m_text;
 		std::shared_ptr<Font> m_font;

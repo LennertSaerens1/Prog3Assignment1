@@ -23,7 +23,6 @@ namespace dae
 
 	protected:
 		explicit Component(GameObject& owner); // Constructor that takes a GameObject as parameter
-
 		GameObject* GetOwner() const { return m_pOwner; } // Get the GameObject that owns this component
 	};
 }

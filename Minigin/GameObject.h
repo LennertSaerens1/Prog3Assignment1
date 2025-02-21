@@ -35,20 +35,38 @@ namespace dae
 
         // Remove a component from the GameObject by pointer (safe removal)
         template <typename T>
-        void removeComponent(T* component) {
-            auto it = std::find_if(m_Components.begin(), m_Components.end(),
-                [component](const std::unique_ptr<Component>& c) {
-                    return c.get() == component;  // Check if the raw pointer matches
+        void removeComponent() {
+            auto it = std::remove_if(m_Components.begin(), m_Components.end(),
+                [](const std::unique_ptr<Component>& c) {
+                    return dynamic_cast<T*>(c.get()) != nullptr;
                 });
 
             if (it != m_Components.end()) {
-                m_Components.erase(it);  // Remove the component from the vector
-                std::cout << "Component removed.\n";
+                m_Components.erase(it, m_Components.end()); // Erase matching elements
+                std::cout << "Component(s) of type " << typeid(T).name() << " removed.\n";
             }
             else {
-                std::cout << "Component not found.\n";
+                std::cout << "No component of type " << typeid(T).name() << " found.\n";
             }
         }
+        //template <typename T>
+        //void removeComponent(T* component) {
+        //    if (!component) return; // Null check for safety
+
+        //    auto it = std::remove_if(m_Components.begin(), m_Components.end(),
+        //        [component](const std::unique_ptr<Component>& c) {
+        //            return c.get() == component;
+        //        });
+
+        //    if (it != m_Components.end()) {
+        //        m_Components.erase(it, m_Components.end()); // Erase safely
+        //        std::cout << "Component removed.\n";
+        //    }
+        //    else {
+        //        std::cout << "Component not found.\n";
+        //    }
+        //}
+
 
         // Get a component from the GameObject by type (returns nullptr if not found)
         template <typename T>
@@ -73,8 +91,36 @@ namespace dae
             return false;  // Return false if no component of type T was found
         }
 
+        void SetParent(GameObject* parent, bool keepWorldPosition);
+        
+        void SetLocalPosition(const glm::vec3& pos);
+
+        void SetPositionDirty();
+
+        GameObject* GetParent() const;
+
+        int GetChildCount() const;
+
+        GameObject* GetChildAt(int idx);
+
+        glm::vec3 GetLocalPosition();
+
+        glm::vec3 GetWorldPosition();
+
+        bool IsChild(GameObject* child) const;
+
+        void UpdateWorldPosition();
+        
+
 	private:
-		Transform m_transform{};
+        void RemoveChild(GameObject* child);
+        void AddChild(GameObject* child);
+
+        bool m_positionIsDirty;
+		Transform m_globalTransform{};
+		Transform m_localTransform{};
         std::vector< std::unique_ptr<Component>> m_Components;  // Store components
+        GameObject* m_parent;
+        std::vector<GameObject*> m_children;
 	};
 }

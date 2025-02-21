@@ -3,14 +3,12 @@
 #include "Renderer.h"
 
 
-dae::FpsComponent::FpsComponent(GameObject& owner)
-	:Component::Component(owner)
+dae::FpsComponent::FpsComponent(std::shared_ptr<Font> font, GameObject& owner)
+	:TextComponent("0 FPS",font,owner)
 	,m_Fps(0)
-	, m_text("FPS: 0")
-	, m_font(std::make_shared<dae::Font>("../Data/Lingua.otf", 36))
-	, m_textTexture(nullptr)
+	,m_elapsedTime{0}
 {
-	
+	m_textTexture = nullptr;
 }
 
 void dae::FpsComponent::Update(const float deltaTime)
@@ -47,17 +45,3 @@ void dae::FpsComponent::Update(const float deltaTime)
 	}
 }
 
-void dae::FpsComponent::FixedUpdate(const float )
-{
-	
-}
-
-void dae::FpsComponent::Render(float x, float y) const
-{
-	
-
-	if (m_textTexture != nullptr)
-	{
-		dae::Renderer::GetInstance().RenderTexture(*m_textTexture, x, y);
-	}
-}
