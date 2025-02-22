@@ -34,6 +34,22 @@ void dae::RenderComponent::Render(float x, float y) const
 	}
 }
 
+void dae::RenderComponent::Render(float x, float y, float Width, float Height) const
+{
+	if (m_Texture != nullptr)
+	{
+		dae::Renderer::GetInstance().RenderTexture(*m_Texture, x, y, Width, Height);
+	}
+}
+
+void dae::RenderComponent::Render(float x, float y, float srcX, float srcY, float srcWidth, float srcHeight) const
+{
+	if (m_Texture != nullptr)
+	{
+		dae::Renderer::GetInstance().RenderTexture(*m_Texture, x, y,srcX,srcY, srcWidth, srcHeight);
+	}
+}
+
 void dae::RenderComponent::SetTexture(const std::string& filePath)
 {
 	if (m_Texture == nullptr)

@@ -4,6 +4,8 @@
 
 namespace dae
 {
+
+
 	class Minigin
 	{
 	public:

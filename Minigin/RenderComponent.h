@@ -15,6 +15,8 @@ namespace dae
 		void Update(const float deltaTime) override;
 		void FixedUpdate(const float fixedTime) override;
 		void Render(float x, float y) const override;
+		void Render(float x, float y,  float Width, float Height) const;
+		void Render(float x, float y, float scrX, float srcY, float srcWidth, float srcHeight) const;
 
 		void SetTexture(const std::string& filePath);
 
