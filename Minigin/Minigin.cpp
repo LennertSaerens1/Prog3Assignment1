@@ -9,9 +9,7 @@
 #include "SceneManager.h"
 #include "Renderer.h"
 #include "ResourceManager.h"
-#include <chrono>
 #include <thread>
-using namespace std::chrono;
 SDL_Window* g_window{};
 
 void PrintSDLVersion()
@@ -87,12 +85,12 @@ void dae::Minigin::Run(const std::function<void()>& load)
 
 	
 	bool do_continue = true;
-	auto last_time = high_resolution_clock::now();
+	auto last_time = std::chrono::high_resolution_clock::now();
 	float lag = 0.0f;
 	while (do_continue)
 	{
-		const auto current_time = high_resolution_clock::now();
-		const float delta_time = duration<float>(current_time - last_time).count();
+		const auto current_time = std::chrono::high_resolution_clock::now();
+		const float delta_time = std::chrono::duration<float>(current_time - last_time).count();
 		last_time = current_time;	
 		lag += delta_time;
 
@@ -104,16 +102,14 @@ void dae::Minigin::Run(const std::function<void()>& load)
 		}
 		sceneManager.Update(delta_time);
 		renderer.Render();
-		std::chrono::duration<float, std::milli> duration(ms_per_frame);
-		const auto sleep_time = current_time + duration - high_resolution_clock::now();
-		std::this_thread::sleep_for(sleep_time);
-		
-	}
 
-	
+		const auto sleep_time = current_time + ms_per_frame - std::chrono::high_resolution_clock::now();
+		std::this_thread::sleep_for(sleep_time);
+	}
 }
 
 void dae::Minigin::SetFrameRate(int FrameRate)
 {
-	ms_per_frame = 1000.0f / FrameRate;
+	float sleepTime = 1000.0f / FrameRate;
+	ms_per_frame = std::chrono::milliseconds{ static_cast<int>(std::round(sleepTime)) };
 }

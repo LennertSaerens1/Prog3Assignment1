@@ -5,33 +5,18 @@
 void dae::RotationComponent::Update(const float deltaTime)
 {	
     auto owner = this->GetOwner();
-    GameObject* parent = owner->GetParent();
-
-    // Determine middle point
-    if (parent != nullptr)
-    {
-        m_MiddlePos = parent->GetWorldPosition(); // If there is a parent, rotate around its world position
-    }
 
     m_CurrentRotation += (m_angleDegPerSecond * float(M_PI) / 180.0f) * deltaTime; // Convert to radians & scale by deltaTime
+    //Check if angle is greater than 2 pi or less than -2pi and change it accordingly with +2pi or -2pi
+
 
     float s = sin(m_CurrentRotation);
     float c = cos(m_CurrentRotation);
 
-    
     glm::vec3 newPosition{};
-    if (parent == nullptr)
-        newPosition =  glm::vec3(m_MiddlePos.x + s * m_distFromMiddle, m_MiddlePos.y + c * m_distFromMiddle, 0);
-    else
-    {
-        newPosition = glm::vec3(s * m_distFromMiddle, c * m_distFromMiddle, 0);
+        newPosition = glm::vec3(c * m_distFromMiddle, s * m_distFromMiddle, 0);
 
-    }
     owner->SetLocalPosition(newPosition);
-
-    owner->SetPositionDirty();
-    owner->UpdateWorldPosition();   
-
 }
 
 dae::RotationComponent::RotationComponent(const std::string& filePath, GameObject& owner)

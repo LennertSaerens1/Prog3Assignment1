@@ -8,7 +8,6 @@ namespace dae
 {
 	class Texture2D;
 
-	// todo: this should become final.
 	class GameObject final
 	{
 	public:
@@ -16,7 +15,7 @@ namespace dae
 		virtual void FixedUpdate(const float fixedTime);
 		virtual void Render() const;
 
-		void SetPosition(float x, float y);
+		void SetWorldPosition(float x, float y);
 
 		GameObject() = default;
 		virtual ~GameObject();
@@ -116,11 +115,12 @@ namespace dae
         void RemoveChild(GameObject* child);
         void AddChild(GameObject* child);
 
-        bool m_positionIsDirty;
 		Transform m_globalTransform{};
 		Transform m_localTransform{};
         std::vector< std::unique_ptr<Component>> m_Components;  // Store components
         GameObject* m_parent;
         std::vector<GameObject*> m_children;
+        bool m_positionIsDirty;
+
 	};
 }

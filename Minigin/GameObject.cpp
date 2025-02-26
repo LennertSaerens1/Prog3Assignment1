@@ -25,11 +25,17 @@ void dae::GameObject::SetParent(GameObject* parent, bool keepWorldPosition)
 void dae::GameObject::SetLocalPosition(const glm::vec3& pos)
 {
     m_localTransform.SetPosition(pos.x, pos.y, pos.z);
+    SetPositionDirty();
 }
 
 void dae::GameObject::SetPositionDirty()
 {
     m_positionIsDirty = true;
+    for (auto child : m_children)
+    {
+        child->SetPositionDirty();
+    }
+    //Children moeten ook dirty zijn!
 }
 
 dae::GameObject* dae::GameObject::GetParent() const
@@ -94,6 +100,7 @@ void dae::GameObject::RemoveChild(GameObject* child)
 
 void dae::GameObject::AddChild(GameObject* child)
 {
+    //Mag enkel omdat het private is!
     m_children.emplace_back(child);
 }
 
@@ -103,6 +110,7 @@ void dae::GameObject::Update(const float deltaTime) {
 	{
 		component->Update(deltaTime);
 	}
+    UpdateWorldPosition();
 }
 
 void dae::GameObject::FixedUpdate(const float fixedTime) { 
@@ -120,7 +128,9 @@ void dae::GameObject::Render() const
 	}
 }
 
-void dae::GameObject::SetPosition(float x, float y)
+void dae::GameObject::SetWorldPosition(float x, float y)
 {
 	m_globalTransform.SetPosition(x, y, 0.0f);
+
 }
+

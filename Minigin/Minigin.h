@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <functional>
+#include <chrono>
 
 namespace dae
 {
@@ -20,6 +21,6 @@ namespace dae
 		Minigin& operator=(Minigin&& other) = delete;
 	private:
 		float fixed_time_step = 0.08f;
-		float ms_per_frame = 16;
+		std::chrono::milliseconds ms_per_frame{ 16 };
 	};
 }
