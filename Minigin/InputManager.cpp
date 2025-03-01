@@ -1,5 +1,6 @@
 #include <SDL.h>
 #include "InputManager.h"
+#include "imgui_impl_sdl2.h"
 
 bool dae::InputManager::ProcessInput(float)
 {
@@ -15,6 +16,7 @@ bool dae::InputManager::ProcessInput(float)
 			
 		}
 		// etc...
+		ImGui_ImplSDL2_ProcessEvent(&e);
 	}
 
 	return true;
