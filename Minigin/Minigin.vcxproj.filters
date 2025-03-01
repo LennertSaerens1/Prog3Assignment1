@@ -69,9 +69,6 @@
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ImGuiRenderer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\3rdParty\imgui\imconfig.h">
       <Filter>ImGui</Filter>
     </ClInclude>
@@ -150,9 +147,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="RotationComponent.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ImGuiRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\3rdParty\imgui\imgui.cpp">
