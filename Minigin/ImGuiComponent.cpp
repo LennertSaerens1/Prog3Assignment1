@@ -283,7 +283,7 @@ void dae::ImGuiComponent::Render(float, float) const
         auto maxElement = std::max_element(m_timeVectorGameObject.begin(), m_timeVectorGameObject.end());
         auto maxElementPtr = std::max_element(m_timeVectorGameObjectPtr.begin(), m_timeVectorGameObjectPtr.end());
 
-        auto biggestNumber = std::max(maxElement, maxElementPtr);
+        auto biggestNumber = std::max(*maxElement, *maxElementPtr);
 
         ImGui::Text("Combined:");
 
@@ -293,7 +293,7 @@ void dae::ImGuiComponent::Render(float, float) const
         config.values.ys_count = 2;  // Number of datasets
         config.values.count = size;
         config.scale.min = 0;
-        config.scale.max = *biggestNumber;
+        config.scale.max = biggestNumber;
         config.tooltip.show = true;
         config.tooltip.format = "x=%.2f, y=%.2f";
         config.grid_x.show = true;
