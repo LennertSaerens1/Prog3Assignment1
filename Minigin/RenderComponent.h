@@ -17,6 +17,8 @@ namespace dae
 		void Render(float x, float y) const override;
 		void Render(float x, float y,  float Width, float Height) const;
 		void Render(float x, float y, float scrX, float srcY, float srcWidth, float srcHeight) const;
+		void ImGuiRender() override;
+
 
 		void SetTexture(const std::string& filePath);
 

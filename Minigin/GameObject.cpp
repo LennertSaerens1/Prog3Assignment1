@@ -128,6 +128,14 @@ void dae::GameObject::Render() const
 	}
 }
 
+void dae::GameObject::ImGuiRender() const
+{
+    for (const auto& component : m_Components)
+    {
+        component->ImGuiRender();
+    }
+}
+
 void dae::GameObject::SetWorldPosition(float x, float y)
 {
 	m_globalTransform.SetPosition(x, y, 0.0f);

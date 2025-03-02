@@ -14,6 +14,8 @@ namespace dae
 		void Update(const float deltaTime) override;
 		void FixedUpdate(const float fixedTime) override;
 		void Render(float x, float y) const override;
+		void ImGuiRender() override;
+
 
 		void SetText(const std::string& text);
 

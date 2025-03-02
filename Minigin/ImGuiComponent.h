@@ -43,6 +43,8 @@ namespace dae
 		void Update(float elapsedSec) override;
 		void FixedUpdate(float fixedSec) override;
 		void Render(float x, float y) const override;
+		void ImGuiRender() override;
+
 
 		ImGuiComponent(dae::GameObject& owner);
 		virtual ~ImGuiComponent() = default;

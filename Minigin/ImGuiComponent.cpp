@@ -16,11 +16,15 @@ void dae::ImGuiComponent::TrashWithInts(int amount) const
 {
     m_timeVector.clear();
     std::vector<int> Vector{};
-    for (int idx{}; idx < 1000000; idx++)
+    for (int idx{}; idx < 10000000; idx++)
     {
         Vector.push_back(2);
     }
     int stepSize{};
+    for (int idx{}; idx < 11; ++idx)
+    {
+        m_timeVector.push_back(0);
+    }
     m_timeVector.reserve(11);
     for (int i{}; i < amount ;++i)
     {
@@ -35,7 +39,6 @@ void dae::ImGuiComponent::TrashWithInts(int amount) const
             auto end = high_resolution_clock::now();
             std::chrono::duration<float, std::milli> duration(end - start);
             std::cout << "The Elapsed timefor stepsize: " << stepSize << " is: " << duration.count() << std::endl;
-            m_timeVector.push_back(duration.count());
             m_timeVector[idx] += duration.count();
             ++idx;
         }
@@ -56,7 +59,10 @@ void dae::ImGuiComponent::TrashWithGameObject(int amount) const
         Vector.push_back(GameObject3D());
     }
     int stepSize{};
-    m_timeVectorGameObject.reserve(11);
+    for (int idx{}; idx < 11; ++idx)
+    {
+        m_timeVectorGameObject.push_back(0);
+    }
     for (int i{}; i < amount; ++i)
     {
         int idx{ 0 };
@@ -70,7 +76,7 @@ void dae::ImGuiComponent::TrashWithGameObject(int amount) const
             auto end = high_resolution_clock::now();
             std::chrono::duration<float, std::milli> duration(end - start);
             std::cout << "The Elapsed timefor stepsize: " << stepSize << " is: " << duration.count() << std::endl;
-            m_timeVectorGameObject.push_back(duration.count());
+            
             m_timeVectorGameObject[idx] += duration.count();
             ++idx;
         }
@@ -91,6 +97,10 @@ void dae::ImGuiComponent::TrashWithGameObjectPtr(int amount) const
         Vector.push_back(GameObject3DPtr());
     }
     int stepSize{};
+    for (int idx{}; idx < 11; ++idx)
+    {
+        m_timeVectorGameObjectPtr.push_back(0);
+    }
     m_timeVectorGameObjectPtr.reserve(11);
     for (int i{}; i < amount; ++i)
     {
@@ -105,7 +115,6 @@ void dae::ImGuiComponent::TrashWithGameObjectPtr(int amount) const
             auto end = high_resolution_clock::now();
             std::chrono::duration<float, std::milli> duration(end - start);
             std::cout << "The Elapsed timefor stepsize: " << stepSize << " is: " << duration.count() << std::endl;
-            m_timeVectorGameObjectPtr.push_back(duration.count());
             m_timeVectorGameObjectPtr[idx] += duration.count();
             ++idx;
         }
@@ -124,7 +133,11 @@ void dae::ImGuiComponent::FixedUpdate(float)
 {
 }
 
-void dae::ImGuiComponent::Render(float, float) const
+void dae::ImGuiComponent::Render(float , float ) const
+{
+}
+
+void dae::ImGuiComponent::ImGuiRender()
 {
     static int number = 10; // Variable to hold the numeric value
 
@@ -176,7 +189,7 @@ void dae::ImGuiComponent::Render(float, float) const
         config.tooltip.format = "x=%.2f, y=%.2f";
         config.grid_x.show = true;
         config.grid_y.show = true;
-        config.frame_size = ImVec2(250, 250);
+        config.frame_size = ImVec2(300, 250);
         config.line_thickness = 2.f;
 
         ImGui::Plot("Trash with Ints", config);
@@ -235,7 +248,7 @@ void dae::ImGuiComponent::Render(float, float) const
         config.tooltip.format = "x=%.2f, y=%.2f";
         config.grid_x.show = true;
         config.grid_y.show = true;
-        config.frame_size = ImVec2(250, 250);
+        config.frame_size = ImVec2(300, 250);
         config.line_thickness = 2.f;
         config.values.color = IM_COL32(0, 255, 0, 255);
 
@@ -266,7 +279,7 @@ void dae::ImGuiComponent::Render(float, float) const
         config.tooltip.format = "x=%.2f, y=%.2f";
         config.grid_x.show = true;
         config.grid_y.show = true;
-        config.frame_size = ImVec2(250, 250);
+        config.frame_size = ImVec2(300, 250);
         config.line_thickness = 2.f;
         config.values.color = IM_COL32(0, 128, 128, 255);
 

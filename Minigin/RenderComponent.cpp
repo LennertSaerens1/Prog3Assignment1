@@ -50,6 +50,10 @@ void dae::RenderComponent::Render(float x, float y, float srcX, float srcY, floa
 	}
 }
 
+void dae::RenderComponent::ImGuiRender()
+{
+}
+
 void dae::RenderComponent::SetTexture(const std::string& filePath)
 {
 	if (m_Texture == nullptr)

@@ -50,3 +50,11 @@ void Scene::Render() const
 	}
 }
 
+void dae::Scene::ImGuiRender() const
+{
+	for (const auto& object : m_objects)
+	{
+		object->ImGuiRender();
+	}
+}
+
