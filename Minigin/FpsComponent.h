@@ -24,6 +24,8 @@ namespace dae
 		float m_Fps;
 		float m_elapsedTime;
 		const float m_rateRefresh{ (1.0f / 10.0f) };
+		float m_LastTwoValues[2]{};
+		
 	};
 }
 

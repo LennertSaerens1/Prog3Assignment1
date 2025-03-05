@@ -95,21 +95,21 @@ void dae::Minigin::Run(const std::function<void()>& load)
 		lag += delta_time;
 
 		do_continue = input.ProcessInput(delta_time);
-		while (lag >= fixed_time_step)
+		/*while (lag >= fixed_time_step)
 		{
 			sceneManager.FixedUpdate(fixed_time_step);
 			lag -= fixed_time_step;
-		}
+		}*/
 		sceneManager.Update(delta_time);
 		renderer.Render();
 
-		const auto sleep_time = current_time + ms_per_frame - std::chrono::high_resolution_clock::now();
+		const auto sleep_time = (current_time + ms_per_frame) - std::chrono::high_resolution_clock::now();
 		std::this_thread::sleep_for(sleep_time);
 	}
 }
 
 void dae::Minigin::SetFrameRate(int FrameRate)
 {
-	float sleepTime = 1000.0f / FrameRate;
-	ms_per_frame = std::chrono::milliseconds{ static_cast<int>(std::round(sleepTime)) };
+	int sleepTime = 1000 / FrameRate;
+	ms_per_frame = std::chrono::milliseconds{ sleepTime };
 }

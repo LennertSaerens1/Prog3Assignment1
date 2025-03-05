@@ -16,8 +16,12 @@ void dae::FpsComponent::Update(const float deltaTime)
 	m_elapsedTime += deltaTime;
 
 	// Only update the FPS text 3 times per second
-	if (m_elapsedTime >= m_rateRefresh) {
-		m_Fps = 1.0f / deltaTime;
+	if (m_elapsedTime >= m_rateRefresh) 
+	{
+
+		float averageTime = (deltaTime + m_LastTwoValues[0] + m_LastTwoValues[1]) / 3;
+
+		m_Fps = 1.0f / averageTime;
 
 		// Format FPS with one decimal place
 		std::ostringstream stream;
@@ -43,5 +47,11 @@ void dae::FpsComponent::Update(const float deltaTime)
 		SDL_FreeSurface(surf);
 		m_textTexture = std::make_shared<dae::Texture2D>(texture);
 	}
+	else
+	{
+		m_LastTwoValues[0] = m_LastTwoValues[1];
+		m_LastTwoValues[1] = deltaTime;
+	}
+
 }
 
