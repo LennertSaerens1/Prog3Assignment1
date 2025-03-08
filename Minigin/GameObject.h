@@ -95,6 +95,10 @@ namespace dae
         
         void SetLocalPosition(const glm::vec3& pos);
 
+        void AddWorldOffset(const glm::vec3& pos);
+
+        void AddLocalOffset(const glm::vec3& pos);
+
         void SetPositionDirty();
 
         GameObject* GetParent() const;

@@ -28,6 +28,19 @@ void dae::GameObject::SetLocalPosition(const glm::vec3& pos)
     SetPositionDirty();
 }
 
+void dae::GameObject::AddWorldOffset(const glm::vec3& pos)
+{
+    auto currentPos = m_globalTransform.GetPosition();
+    m_globalTransform.SetPosition(currentPos.x + pos.x, currentPos.y + pos.y, currentPos.z + pos.z);
+}
+
+void dae::GameObject::AddLocalOffset(const glm::vec3& pos)
+{
+    auto currentPos = m_localTransform.GetPosition();
+    m_localTransform.SetPosition(currentPos.x + pos.x, currentPos.y + pos.y, currentPos.z + pos.z);
+    SetPositionDirty();
+}
+
 void dae::GameObject::SetPositionDirty()
 {
     m_positionIsDirty = true;
