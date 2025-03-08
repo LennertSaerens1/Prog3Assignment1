@@ -4,6 +4,7 @@
 #include "KeyBoardInput.h"
 #include <unordered_map>
 #include "Commands.h"
+#include <Windows.h>
 
 namespace dae
 {
@@ -18,6 +19,10 @@ namespace dae
 
 		void HandleKeyboardInput(int key, float elapsedSec);
 		void HandleControllerInput(int button, float elapsedSec);
+
+		// Unbind keyboard commands
+		void UnbindKeyboardCommand(int input, std::shared_ptr<Command> command);
+		void UnbindControllerCommand(int input, std::shared_ptr<Command> command);
 	private:
 		Controller m_Controller = Controller(0);
 		KeyBoardInput m_Keyboard = KeyBoardInput();

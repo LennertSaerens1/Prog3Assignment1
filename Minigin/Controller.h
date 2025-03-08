@@ -1,7 +1,5 @@
 #pragma once
-#include <Windows.h>
-#include <Xinput.h>
-#include <chrono>
+#include <memory> // For std::unique_ptr
 
 namespace dae
 {
@@ -9,12 +7,12 @@ namespace dae
     {
     public:
         Controller(int controllerIndex);
+        ~Controller();
+
         void ProcessInput();
         bool IsDownThisFrame(unsigned int button) const;
         bool IsUpThisFrame(unsigned int button) const;
         bool IsPressed(unsigned int button) const;
-
-        void TestController();
 
         // Stick input methods
         float GetLeftStickX() const;
@@ -33,18 +31,8 @@ namespace dae
         void Rumble(float leftMotorSpeed, float rightMotorSpeed, float durationInSeconds);
 
     private:
-        DWORD m_controllerIndex;
-
-        XINPUT_STATE currentState;
-        XINPUT_STATE previousState;
-        unsigned int buttonsPressedThisFrame;
-        unsigned int buttonsReleasedThisFrame;
-
-        bool m_isConnected = false;
-        float m_deadzone; // Deadzone threshold for analog sticks
-
-        // Rumble timer
-        std::chrono::steady_clock::time_point m_rumbleEndTime;
-        bool m_isRumbling;
+        // Pointer to the PImpl class
+        class Impl;
+        std::unique_ptr<Impl> pImpl;  // PImpl idiom
     };
 }
