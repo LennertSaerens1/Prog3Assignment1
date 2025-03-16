@@ -92,7 +92,58 @@ public:
         return y;
     }
 
-    // Other methods...
+    float GetRightStickX() const
+    {
+        float x = static_cast<float>(currentState.Gamepad.sThumbRX) / 32767.0f;
+        if (std::abs(x) < m_deadzone) x = 0.0f;
+        return x;
+    }
+
+    float GetRightStickY() const
+    {
+        float y = static_cast<float>(currentState.Gamepad.sThumbRY) / 32767.0f;
+        if (std::abs(y) < m_deadzone) y = 0.0f;
+        return y;
+    }
+
+    float GetLeftTrigger() const
+    {
+        return static_cast<float>(currentState.Gamepad.bLeftTrigger) / 255.0f;
+    }
+
+    float GetRightTrigger() const
+    {
+        return static_cast<float>(currentState.Gamepad.bRightTrigger) / 255.0f;
+    }
+
+    void SetDeadzone(float deadzone)
+    {
+        // Clamp deadzone to reasonable values (0.0 to 1.0)
+        m_deadzone = std::clamp(deadzone, 0.0f, 1.0f);
+    }
+
+    void Rumble(float leftMotorSpeed, float rightMotorSpeed, float durationInSeconds)
+    {
+        // Clamp motor speeds to valid range (0.0 to 1.0)
+        leftMotorSpeed = std::clamp(leftMotorSpeed, 0.0f, 1.0f);
+        rightMotorSpeed = std::clamp(rightMotorSpeed, 0.0f, 1.0f);
+
+        // Convert to XInput expected value (0 to 65535)
+        WORD leftMotor = static_cast<WORD>(leftMotorSpeed * 65535.0f);
+        WORD rightMotor = static_cast<WORD>(rightMotorSpeed * 65535.0f);
+
+        // Set vibration
+        XINPUT_VIBRATION vibration;
+        vibration.wLeftMotorSpeed = leftMotor;
+        vibration.wRightMotorSpeed = rightMotor;
+
+        if (XInputSetState(m_controllerIndex, &vibration) == ERROR_SUCCESS)
+        {
+            m_isRumbling = true;
+            m_rumbleEndTime = std::chrono::steady_clock::now() +
+                std::chrono::milliseconds(static_cast<int>(durationInSeconds * 1000.0f));
+        }
+    }
 };
 
 // Constructor that initializes the PImpl
@@ -113,4 +164,12 @@ bool dae::Controller::IsPressed(unsigned int button) const { return pImpl->IsPre
 float dae::Controller::GetLeftStickX() const { return pImpl->GetLeftStickX(); }
 float dae::Controller::GetLeftStickY() const { return pImpl->GetLeftStickY(); }
 
-// Other methods...
+float dae::Controller::GetRightStickX() const { return pImpl->GetRightStickX(); }
+float dae::Controller::GetRightStickY() const { return pImpl->GetRightStickY(); }
+float dae::Controller::GetLeftTrigger() const { return pImpl->GetLeftTrigger(); }
+float dae::Controller::GetRightTrigger() const { return pImpl->GetRightTrigger(); }
+void dae::Controller::SetDeadzone(float deadzone) { pImpl->SetDeadzone(deadzone); }
+void dae::Controller::Rumble(float leftMotorSpeed, float rightMotorSpeed, float durationInSeconds)
+{
+    pImpl->Rumble(leftMotorSpeed, rightMotorSpeed, durationInSeconds);
+}

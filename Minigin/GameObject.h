@@ -3,6 +3,9 @@
 #include "Transform.h"
 #include "iostream"
 #include "Component.h"
+#include "Observer.h"
+#include <vector>
+#include <algorithm>
 
 namespace dae
 {
@@ -24,6 +27,7 @@ namespace dae
 		GameObject(GameObject&& other) = delete;
 		GameObject& operator=(const GameObject& other) = delete;
 		GameObject& operator=(GameObject&& other) = delete;
+
 
         template <typename T, typename... Args>
         void AddComponent(Args&&... args) {
@@ -49,24 +53,24 @@ namespace dae
                 std::cout << "No component of type " << typeid(T).name() << " found.\n";
             }
         }
-        //template <typename T>
-        //void removeComponent(T* component) {
-        //    if (!component) return; // Null check for safety
 
-        //    auto it = std::remove_if(m_Components.begin(), m_Components.end(),
-        //        [component](const std::unique_ptr<Component>& c) {
-        //            return c.get() == component;
-        //        });
+        void AddObserver(std::shared_ptr<dae::Observer> observer) {
+            // Check if the observer already exists in the vector to avoid duplicates
+            if (std::find(m_observers.begin(), m_observers.end(), observer) == m_observers.end()) {
+                // Only add if not already in the list
+                m_observers.push_back(observer);
+            }
+        }
 
-        //    if (it != m_Components.end()) {
-        //        m_Components.erase(it, m_Components.end()); // Erase safely
-        //        std::cout << "Component removed.\n";
-        //    }
-        //    else {
-        //        std::cout << "Component not found.\n";
-        //    }
-        //}
+        void RemoveObserver(std::shared_ptr<dae::Observer> observer) {
+            // Find the observer in the vector
+            auto it = std::find(m_observers.begin(), m_observers.end(), observer);
 
+            // If found, remove it
+            if (it != m_observers.end()) {
+                m_observers.erase(it);
+            }
+        }
 
         // Get a component from the GameObject by type (returns nullptr if not found)
         template <typename T>
@@ -114,7 +118,13 @@ namespace dae
         bool IsChild(GameObject* child) const;
 
         void UpdateWorldPosition();
-        
+       
+        void NotifyObservers(dae::GameEvent event) {
+            for (auto observer : m_observers)
+                observer->Notify(event, this);
+        }
+
+
 
 	private:
         void RemoveChild(GameObject* child);
@@ -126,6 +136,8 @@ namespace dae
         GameObject* m_parent;
         std::vector<GameObject*> m_children;
         bool m_positionIsDirty;
+
+        std::vector<std::shared_ptr<dae::Observer>> m_observers;
 
 	};
 }

@@ -6,13 +6,13 @@
 using namespace std::chrono;
 
 
-dae::ImGuiComponent::ImGuiComponent(dae::GameObject& owner)
+dae::TrasheTheCacheComponent::TrasheTheCacheComponent(dae::GameObject& owner)
     :Component(owner)
 {
 
 }
 
-void dae::ImGuiComponent::TrashWithInts(int amount) const
+void dae::TrasheTheCacheComponent::TrashWithInts(int amount) const
 {
     m_timeVector.clear();
     std::vector<int> Vector{};
@@ -32,7 +32,7 @@ void dae::ImGuiComponent::TrashWithInts(int amount) const
         for (stepSize = 1; stepSize <= 1024; stepSize *= 2)
         {
             auto start = high_resolution_clock::now();
-            for (int v{}; v < Vector.size(); v += stepSize)
+            for (unsigned int v{}; v < Vector.size(); v += stepSize)
             {
                 Vector[v] *= 2;
             }
@@ -49,7 +49,7 @@ void dae::ImGuiComponent::TrashWithInts(int amount) const
     }
 }
 
-void dae::ImGuiComponent::TrashWithGameObject(int amount) const
+void dae::TrasheTheCacheComponent::TrashWithGameObject(int amount) const
 {
     m_timeVectorGameObject.clear();
 
@@ -69,7 +69,7 @@ void dae::ImGuiComponent::TrashWithGameObject(int amount) const
         for (stepSize = 1; stepSize <= 1024; stepSize *= 2)
         {
             auto start = high_resolution_clock::now();
-            for (int v{}; v < Vector.size(); v += stepSize)
+            for (unsigned int v{}; v < Vector.size(); v += stepSize)
             {
                 Vector[v].id *= 2;
             }
@@ -87,7 +87,7 @@ void dae::ImGuiComponent::TrashWithGameObject(int amount) const
     }
 }
 
-void dae::ImGuiComponent::TrashWithGameObjectPtr(int amount) const
+void dae::TrasheTheCacheComponent::TrashWithGameObjectPtr(int amount) const
 {
     m_timeVectorGameObjectPtr.clear();
 
@@ -108,7 +108,7 @@ void dae::ImGuiComponent::TrashWithGameObjectPtr(int amount) const
         for (stepSize = 1; stepSize <= 1024; stepSize *= 2)
         {
             auto start = high_resolution_clock::now();
-            for (int v{}; v < Vector.size(); v += stepSize)
+            for (unsigned int v{}; v < Vector.size(); v += stepSize)
             {
                 Vector[v].id *= 2;
             }
@@ -125,19 +125,19 @@ void dae::ImGuiComponent::TrashWithGameObjectPtr(int amount) const
     }
 }
 
-void dae::ImGuiComponent::Update(float)
+void dae::TrasheTheCacheComponent::Update(float)
 {
 }
 
-void dae::ImGuiComponent::FixedUpdate(float)
+void dae::TrasheTheCacheComponent::FixedUpdate(float)
 {
 }
 
-void dae::ImGuiComponent::Render(float , float ) const
+void dae::TrasheTheCacheComponent::Render(float , float ) const
 {
 }
 
-void dae::ImGuiComponent::ImGuiRender()
+void dae::TrasheTheCacheComponent::ImGuiRender()
 {
     static int number = 10; // Variable to hold the numeric value
 

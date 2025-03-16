@@ -1,6 +1,6 @@
 #pragma once
 #include "GameObject.h"
-#include "MoveableComponent.h"
+#include "PacManCharacters.h"
 
 namespace dae {
 	class Command {
@@ -19,44 +19,51 @@ namespace dae {
 		virtual ~GameObjectCommand() = default;
 	};
 
-	class MoveLeft : public GameObjectCommand {
+	class MoveCommand : public GameObjectCommand {
 	public:
-		MoveLeft(GameObject* actor) : GameObjectCommand(actor) {}
+		MoveCommand(float speed, glm::vec2 dir, GameObject* actor)
+			: GameObjectCommand(actor)
+			, m_movementSpeed{ speed }
+			, m_direction{ dir }
+		{
+		}
 		void Execute(float elapsedSec) override
 		{
-			auto moveComponent = GetGameObject()->getComponent<MoveableComponent>();
-			moveComponent->MoveLeft(elapsedSec);
+			auto owner = GetGameObject();
+			owner->AddWorldOffset(glm::vec3(m_direction.x * m_movementSpeed * elapsedSec, m_direction.y * m_movementSpeed * elapsedSec, 0));
+		}
+	private:
+		float m_movementSpeed;
+		glm::vec2 m_direction;
+	};
+
+	class DieCommand : public GameObjectCommand {
+	public:
+		DieCommand(GameObject* actor)
+			: GameObjectCommand(actor)
+		{
+		}
+		void Execute(float) override
+		{
+			auto owner = GetGameObject()->getComponent<PacManCharacter>();
+			owner->DecreaseLives();
 		}
 	};
-	
-	class MoveRight : public GameObjectCommand {
+
+	class AddScoreCommand : public GameObjectCommand {
 	public:
-		MoveRight(GameObject* actor) : GameObjectCommand(actor) {}
-		void Execute(float elapsedSec) override
+		AddScoreCommand(int score, GameObject* actor)
+			: GameObjectCommand(actor)
+			, m_score{ score }
 		{
-			auto moveComponent = GetGameObject()->getComponent<MoveableComponent>();
-			moveComponent->MoveRight(elapsedSec);
 		}
-	};
-	
-	class MoveUp : public GameObjectCommand {
-	public:
-		MoveUp(GameObject* actor) : GameObjectCommand(actor) {}
-		void Execute(float elapsedSec) override
+		void Execute(float) override
 		{
-			auto moveComponent = GetGameObject()->getComponent<MoveableComponent>();
-			moveComponent->MoveUp(elapsedSec);
+			auto owner = GetGameObject()->getComponent<PacManCharacter>();
+			owner->AddScore(m_score);
 		}
-	};
-	
-	class MoveDown : public GameObjectCommand {
-	public:
-		MoveDown(GameObject* actor) : GameObjectCommand(actor) {}
-		void Execute(float elapsedSec) override
-		{
-			auto moveComponent = GetGameObject()->getComponent<MoveableComponent>();
-			moveComponent->MoveDown(elapsedSec);
-		}
+	private:
+		int m_score;
 	};
 }
 

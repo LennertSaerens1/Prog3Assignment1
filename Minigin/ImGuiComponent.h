@@ -27,7 +27,7 @@ namespace dae
         int id;
     };
 
-    class ImGuiComponent : public Component
+    class TrasheTheCacheComponent : public Component
     {
 	private:
 		void TrashWithInts(int amount) const;
@@ -46,12 +46,12 @@ namespace dae
 		void ImGuiRender() override;
 
 
-		ImGuiComponent(dae::GameObject& owner);
-		virtual ~ImGuiComponent() = default;
-		ImGuiComponent(const ImGuiComponent& other) = delete;
-		ImGuiComponent(ImGuiComponent&& other) = delete;
-		ImGuiComponent& operator=(const ImGuiComponent& other) = delete;
-		ImGuiComponent& operator=(ImGuiComponent&& other) = delete;
+		TrasheTheCacheComponent(dae::GameObject& owner);
+		virtual ~TrasheTheCacheComponent() = default;
+		TrasheTheCacheComponent(const TrasheTheCacheComponent& other) = delete;
+		TrasheTheCacheComponent(TrasheTheCacheComponent&& other) = delete;
+		TrasheTheCacheComponent& operator=(const TrasheTheCacheComponent& other) = delete;
+		TrasheTheCacheComponent& operator=(TrasheTheCacheComponent&& other) = delete;
 	
     };
 }

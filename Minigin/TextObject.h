@@ -17,7 +17,7 @@ namespace dae
 		void ImGuiRender() override;
 
 
-		void SetText(const std::string& text);
+		virtual void SetText(const std::string& text);
 
 		TextComponent(const std::string& text, std::shared_ptr<Font> font, dae::GameObject& owner);
 		virtual ~TextComponent() = default;
