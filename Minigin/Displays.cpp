@@ -8,7 +8,7 @@ void dae::LivesDisplayObserver::Notify(GameEvent event, GameObject* actor)
 	{
 	case GameEvent::PlayerDied:
 		auto lives = actor->getComponent<PacManCharacter>()->GetLives();
-		m_livesTextComp->SetText("Lives: " + std::to_string(lives));
+		m_livesTextComp->SetText("# Lives: " + std::to_string(lives));
 		break;
 	}
 }
