@@ -1,10 +1,16 @@
 #include "Observer.h"
 
-void dae::SteamAchievements::Notify(GameEvent event, GameObject*)
+
+dae::SteamAchievementObserver::SteamAchievementObserver()
 {
-	switch (event) {
-	case GameEvent::playerWon:
-		//Implement steam achievement
-		break;
-	}
 }
+
+void dae::SteamAchievementObserver::Notify(GameEvent event, GameObject* )
+	{
+		switch (event) {
+		case GameEvent::playerWon:
+			if (g_SteamAchievements)
+				g_SteamAchievements->SetAchievement("ACH_WIN_ONE_GAME");
+			break;
+		}
+	}

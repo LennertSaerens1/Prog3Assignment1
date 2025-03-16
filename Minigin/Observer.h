@@ -1,4 +1,6 @@
 #pragma once
+#include "SteamAchievement.h"
+
 class GameObject;
 
 namespace dae
@@ -17,9 +19,11 @@ namespace dae
 		virtual void Notify(GameEvent event, GameObject* actor) = 0;
 	};
 
-	class SteamAchievements : public Observer
+	class SteamAchievementObserver
+		: public Observer
 	{
 	public:
+		SteamAchievementObserver();
 		void Notify(GameEvent event, GameObject* actor) override;
 		
 	};

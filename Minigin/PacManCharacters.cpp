@@ -21,6 +21,10 @@ void dae::PacManCharacter::AddScore(int score)
 {
 	m_score += score;
 	GetOwner()->NotifyObservers(GameEvent::PlayerScored);
+	if (m_score >= 500)
+	{
+		GetOwner()->NotifyObservers(GameEvent::playerWon);
+	}
 }
 
 int dae::PacManCharacter::GetLives() const

@@ -10,7 +10,10 @@
 #include "Renderer.h"
 #include "ResourceManager.h"
 #include <thread>
+#include "SteamAchievement.h"
 SDL_Window* g_window{};
+
+
 
 void PrintSDLVersion()
 {
@@ -102,6 +105,8 @@ void dae::Minigin::Run(const std::function<void()>& load)
 		}
 		sceneManager.Update(delta_time);
 		renderer.Render();
+
+		SteamAPI_RunCallbacks();
 
 		const auto sleep_time = (current_time + ms_per_frame) - std::chrono::high_resolution_clock::now();
 		std::this_thread::sleep_for(sleep_time);
