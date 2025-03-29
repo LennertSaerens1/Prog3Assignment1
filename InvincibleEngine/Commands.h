@@ -1,15 +1,10 @@
 #pragma once
 #include "GameObject.h"
 #include "PacManCharacters.h"
+#include "Command.h"
 
 namespace dae {
-	class Command {
-	public:
-		virtual ~Command() = default;
-		virtual void Execute(float elapsedSec) = 0;
-	};
-
-
+	
 	class GameObjectCommand : public Command {
 		GameObject* m_actor;
 	protected:

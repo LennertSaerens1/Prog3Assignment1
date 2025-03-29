@@ -40,7 +40,7 @@ void PrintSDLVersion()
 		version.major, version.minor, version.patch);
 }
 
-dae::Minigin::Minigin(const std::string &dataPath)
+dae::InvincibleEngine::InvincibleEngine(const std::string &dataPath)
 {
 	PrintSDLVersion();
 	
@@ -67,7 +67,7 @@ dae::Minigin::Minigin(const std::string &dataPath)
 	ResourceManager::GetInstance().Init(dataPath);
 }
 
-dae::Minigin::~Minigin()
+dae::InvincibleEngine::~InvincibleEngine()
 {
 	Renderer::GetInstance().Destroy();
 	SDL_DestroyWindow(g_window);
@@ -75,7 +75,7 @@ dae::Minigin::~Minigin()
 	SDL_Quit();
 }
 
-void dae::Minigin::Run(const std::function<void()>& load)
+void dae::InvincibleEngine::Run(const std::function<void()>& load)
 {
 	load();
 
@@ -108,7 +108,7 @@ void dae::Minigin::Run(const std::function<void()>& load)
 	}
 }
 
-void dae::Minigin::SetFrameRate(int FrameRate)
+void dae::InvincibleEngine::SetFrameRate(int FrameRate)
 {
 	int sleepTime = 1000 / FrameRate;
 	ms_per_frame = std::chrono::milliseconds{ sleepTime };

@@ -4,7 +4,7 @@
 #include "KeyBoardInput.h"
 #include <unordered_map>
 #include <functional>
-#include "Commands.h"
+#include "Command.h"
 #include <Windows.h>
 
 namespace dae

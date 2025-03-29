@@ -151,7 +151,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\InvincibleEngine\Commands.cpp" />
+    <ClCompile Include="..\InvincibleEngine\Displays.cpp" />
     <ClCompile Include="..\InvincibleEngine\Main.cpp" />
+    <ClCompile Include="..\InvincibleEngine\PacManCharacters.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\InvincibleEngine\Commands.h" />
+    <ClInclude Include="..\InvincibleEngine\Displays.h" />
+    <ClInclude Include="..\InvincibleEngine\PacManCharacters.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
