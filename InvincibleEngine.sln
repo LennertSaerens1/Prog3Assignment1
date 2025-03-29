@@ -5,6 +5,11 @@ VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "InvincibleEngine", "InvincibleEngine\InvincibleEngine.vcxproj", "{E2B7A7DB-5DFB-43B6-9E2F-55F459FFA673}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MsPacman", "MsPacman\MsPacman.vcxproj", "{0C907333-C5BF-4592-B575-19789805BCAF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E2B7A7DB-5DFB-43B6-9E2F-55F459FFA673} = {E2B7A7DB-5DFB-43B6-9E2F-55F459FFA673}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +26,14 @@ Global
 		{E2B7A7DB-5DFB-43B6-9E2F-55F459FFA673}.Release|x64.Build.0 = Release|x64
 		{E2B7A7DB-5DFB-43B6-9E2F-55F459FFA673}.Release|x86.ActiveCfg = Release|Win32
 		{E2B7A7DB-5DFB-43B6-9E2F-55F459FFA673}.Release|x86.Build.0 = Release|Win32
+		{0C907333-C5BF-4592-B575-19789805BCAF}.Debug|x64.ActiveCfg = Debug|x64
+		{0C907333-C5BF-4592-B575-19789805BCAF}.Debug|x64.Build.0 = Debug|x64
+		{0C907333-C5BF-4592-B575-19789805BCAF}.Debug|x86.ActiveCfg = Debug|Win32
+		{0C907333-C5BF-4592-B575-19789805BCAF}.Debug|x86.Build.0 = Debug|Win32
+		{0C907333-C5BF-4592-B575-19789805BCAF}.Release|x64.ActiveCfg = Release|x64
+		{0C907333-C5BF-4592-B575-19789805BCAF}.Release|x64.Build.0 = Release|x64
+		{0C907333-C5BF-4592-B575-19789805BCAF}.Release|x86.ActiveCfg = Release|Win32
+		{0C907333-C5BF-4592-B575-19789805BCAF}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
