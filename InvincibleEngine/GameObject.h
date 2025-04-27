@@ -6,6 +6,7 @@
 #include "Observer.h"
 #include <vector>
 #include <algorithm>
+#include "Subject.h"
 
 namespace dae
 {
@@ -54,22 +55,12 @@ namespace dae
             }
         }
 
-        void AddObserver(std::shared_ptr<dae::Observer> observer) {
-            // Check if the observer already exists in the vector to avoid duplicates
-            if (std::find(m_observers.begin(), m_observers.end(), observer) == m_observers.end()) {
-                // Only add if not already in the list
-                m_observers.push_back(observer);
-            }
+		void AddObserver(dae::Observer* observer) {//Make it pointers instead of smart pointers
+			m_subject->AddObserver(observer);
         }
 
-        void RemoveObserver(std::shared_ptr<dae::Observer> observer) {
-            // Find the observer in the vector
-            auto it = std::find(m_observers.begin(), m_observers.end(), observer);
-
-            // If found, remove it
-            if (it != m_observers.end()) {
-                m_observers.erase(it);
-            }
+        void RemoveObserver(dae::Observer* observer) {
+			m_subject->RemoveObserver(observer);
         }
 
         // Get a component from the GameObject by type (returns nullptr if not found)
@@ -120,8 +111,7 @@ namespace dae
         void UpdateWorldPosition();
        
         void NotifyObservers(dae::GameEvent event) {
-            for (auto observer : m_observers)
-                observer->Notify(event, this);
+            m_subject->Notify(event, this);
         }
 
 
@@ -137,7 +127,7 @@ namespace dae
         std::vector<GameObject*> m_children;
         bool m_positionIsDirty;
 
-        std::vector<std::shared_ptr<dae::Observer>> m_observers;
+		std::shared_ptr<Subject> m_subject = std::make_shared<Subject>();
 
 	};
 }

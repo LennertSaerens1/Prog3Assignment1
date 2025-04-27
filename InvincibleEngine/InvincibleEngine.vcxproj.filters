@@ -111,6 +111,15 @@
     <ClInclude Include="Command.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Subject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ServiceLocator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ResourceManager.cpp">
@@ -195,6 +204,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Command.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Subject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ServiceLocator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

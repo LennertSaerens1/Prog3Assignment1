@@ -1,5 +1,6 @@
 #pragma once
 #include "RenderComponent.h"
+#include "SoundSystem.h"
 namespace dae
 {
     class PacManCharacter :
@@ -16,6 +17,7 @@ namespace dae
     private:
         int m_lives;
 		int m_score;
+        dae::sound_id m_loopingId;
     };
 }
 

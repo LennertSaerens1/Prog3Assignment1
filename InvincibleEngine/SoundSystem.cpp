@@ -1,0 +1,162 @@
+#include "SoundSystem.h"
+
+#include <thread>
+#include <mutex>
+#include <queue>
+#include <unordered_map>
+#include <condition_variable>
+#include <string>
+#include <atomic>
+#include <SDL_mixer.h>
+#include <SDL_log.h>
+
+#include <filesystem>
+#include <iostream>
+
+namespace dae
+{
+    class SoundSystem::SoundImpl
+    {
+    public:
+        SoundImpl()
+            : m_Running(true)
+        {
+            if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
+            {
+                SDL_Log("SDL_mixer could not initialize! SDL_mixer Error: %s", Mix_GetError());
+            }
+
+            m_WorkerThread = std::thread(&SoundImpl::processQueue, this);
+        }
+
+        ~SoundImpl()
+        {
+            shutdown();
+        }
+
+        sound_id loadSound(const std::string& filepath)
+        {
+            std::lock_guard<std::mutex> lock(m_Mutex);
+            Mix_Chunk* chunk = Mix_LoadWAV(filepath.c_str());
+            if (!chunk)
+            {
+                SDL_Log("Failed to load sound: %s, SDL_mixer Error: %s", filepath.c_str(), Mix_GetError());
+                return 0;
+            }
+
+            sound_id newId = ++m_NextSoundId;
+            m_Sounds[newId] = chunk;
+            return newId;
+        }
+
+        void play(const sound_id id, float volume, bool loop)
+        {
+            {
+                std::lock_guard<std::mutex> lock(m_Mutex);
+                m_Requests.push({ id, volume, loop });
+            }
+            m_Condition.notify_one();
+        }
+
+        void shutdown()
+        {
+            if (!m_Running) return;
+
+            m_Running = false;
+            m_Condition.notify_one();
+            if (m_WorkerThread.joinable())
+                m_WorkerThread.join();
+
+            for (auto& [id, chunk] : m_Sounds)
+            {
+                Mix_FreeChunk(chunk);
+            }
+            m_Sounds.clear();
+
+            Mix_CloseAudio();
+        }
+
+    private:
+        struct SoundRequest
+        {
+            sound_id id;
+            float volume;
+            bool loop; 
+        };
+
+        void processQueue()
+        {
+            while (m_Running)
+            {
+                SoundRequest request;
+
+                {
+                    std::unique_lock<std::mutex> lock(m_Mutex);
+                    m_Condition.wait(lock, [this] { return !m_Requests.empty() || !m_Running; });
+
+                    if (!m_Running && m_Requests.empty())
+                        break;
+
+                    request = m_Requests.front();
+                    m_Requests.pop();
+                }
+
+                auto it = m_Sounds.find(request.id);
+                if (it != m_Sounds.end())
+                {
+                    Mix_VolumeChunk(it->second, static_cast<int>(MIX_MAX_VOLUME * request.volume));
+                    int loops = request.loop ? -1 : 0; 
+                    Mix_PlayChannel(-1, it->second, loops);
+                }
+            }
+        }
+
+        std::atomic<bool> m_Running;
+        std::thread m_WorkerThread;
+        std::mutex m_Mutex;
+        std::condition_variable m_Condition;
+        std::queue<SoundRequest> m_Requests;
+        std::unordered_map<sound_id, Mix_Chunk*> m_Sounds;
+        sound_id m_NextSoundId{ 0 };
+    };
+
+
+    SoundSystem::SoundSystem()
+        : m_SoundImpl(std::make_unique<SoundImpl>())
+    {
+    }
+
+    SoundSystem::~SoundSystem() = default;
+
+    sound_id SoundSystem::loadSound(const std::string& filepath)
+    {
+        namespace fs = std::filesystem;
+
+        fs::path currentPath = fs::current_path();
+        std::string pathStr = currentPath.string();
+
+        std::string projectName = "MsPacman";
+        size_t pos = pathStr.find(projectName);
+
+        if (pos != std::string::npos)
+        {
+            pathStr = pathStr.substr(0, pos);
+        }
+
+        fs::path fullPath = fs::path(pathStr) / "Data" / filepath;
+        std::string finalPath = fullPath.string();
+
+
+        return m_SoundImpl->loadSound(finalPath);
+    }
+
+    void SoundSystem::play(const sound_id id, float volume, bool loop)
+    {
+        m_SoundImpl->play(id, volume, loop);
+    }
+
+    void SoundSystem::shutdown()
+    {
+        m_SoundImpl->shutdown();
+    }
+}
