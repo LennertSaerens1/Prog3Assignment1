@@ -17,7 +17,7 @@ namespace dae
     private:
         int m_lives;
 		int m_score;
-        dae::sound_id m_loopingId;
+        dae::SoundId m_loopingId;
     };
 }
 

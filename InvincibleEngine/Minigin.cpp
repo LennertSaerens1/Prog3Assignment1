@@ -10,6 +10,8 @@
 #include "Renderer.h"
 #include "ResourceManager.h"
 #include <thread>
+
+#include "ServiceLocator.h"
 SDL_Window* g_window{};
 
 void PrintSDLVersion()
@@ -65,6 +67,8 @@ dae::InvincibleEngine::InvincibleEngine(const std::string &dataPath)
 	Renderer::GetInstance().Init(g_window);
 
 	ResourceManager::GetInstance().Init(dataPath);
+
+	ServiceLocator::RegisterSoundSystem(std::make_unique<NullSoundSystem>());
 }
 
 dae::InvincibleEngine::~InvincibleEngine()

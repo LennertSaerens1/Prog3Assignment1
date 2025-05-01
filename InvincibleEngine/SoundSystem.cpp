@@ -26,15 +26,15 @@ namespace dae
                 SDL_Log("SDL_mixer could not initialize! SDL_mixer Error: %s", Mix_GetError());
             }
 
-            m_WorkerThread = std::thread(&SoundImpl::processQueue, this);
+            m_WorkerThread = std::thread(&SoundImpl::ProcessQueue, this);
         }
 
         ~SoundImpl()
         {
-            shutdown();
+            Shutdown();
         }
 
-        sound_id loadSound(const std::string& filepath)
+        SoundId LoadSound(const std::string& filepath)
         {
             std::lock_guard<std::mutex> lock(m_Mutex);
             Mix_Chunk* chunk = Mix_LoadWAV(filepath.c_str());
@@ -44,12 +44,12 @@ namespace dae
                 return 0;
             }
 
-            sound_id newId = ++m_NextSoundId;
+            SoundId newId = ++m_NextSoundId;
             m_Sounds[newId] = chunk;
             return newId;
         }
 
-        void play(const sound_id id, float volume, bool loop)
+        void Play(const SoundId id, float volume, bool loop)
         {
             {
                 std::lock_guard<std::mutex> lock(m_Mutex);
@@ -58,7 +58,7 @@ namespace dae
             m_Condition.notify_one();
         }
 
-        void shutdown()
+        void Shutdown()
         {
             if (!m_Running) return;
 
@@ -79,19 +79,19 @@ namespace dae
     private:
         struct SoundRequest
         {
-            sound_id id;
+            SoundId id;
             float volume;
             bool loop; 
         };
 
-        void processQueue()
+        void ProcessQueue()
         {
             while (m_Running)
             {
                 SoundRequest request;
 
                 {
-                    std::unique_lock<std::mutex> lock(m_Mutex);
+                    std::unique_lock<std::mutex> lock(m_Mutex); 
                     m_Condition.wait(lock, [this] { return !m_Requests.empty() || !m_Running; });
 
                     if (!m_Running && m_Requests.empty())
@@ -99,7 +99,8 @@ namespace dae
 
                     request = m_Requests.front();
                     m_Requests.pop();
-                }
+					//lock.unlock(); //This makes the threading work again because the lock only needs to lock shared recources, so after the pop it can be unlocked
+				}//Or do it in curly braces, since the lock goes out of scope here and also unlocks the mutex
 
                 auto it = m_Sounds.find(request.id);
                 if (it != m_Sounds.end())
@@ -116,8 +117,8 @@ namespace dae
         std::mutex m_Mutex;
         std::condition_variable m_Condition;
         std::queue<SoundRequest> m_Requests;
-        std::unordered_map<sound_id, Mix_Chunk*> m_Sounds;
-        sound_id m_NextSoundId{ 0 };
+        std::unordered_map<SoundId, Mix_Chunk*> m_Sounds;
+        SoundId m_NextSoundId{ 0 };
     };
 
 
@@ -128,7 +129,7 @@ namespace dae
 
     SoundSystem::~SoundSystem() = default;
 
-    sound_id SoundSystem::loadSound(const std::string& filepath)
+    SoundId SoundSystem::LoadSound(const std::string& filepath)
     {
         namespace fs = std::filesystem;
 
@@ -147,16 +148,16 @@ namespace dae
         std::string finalPath = fullPath.string();
 
 
-        return m_SoundImpl->loadSound(finalPath);
+        return m_SoundImpl->LoadSound(finalPath);
     }
 
-    void SoundSystem::play(const sound_id id, float volume, bool loop)
+    void SoundSystem::Play(const SoundId id, float volume, bool loop)
     {
-        m_SoundImpl->play(id, volume, loop);
+        m_SoundImpl->Play(id, volume, loop);
     }
 
-    void SoundSystem::shutdown()
+    void SoundSystem::Shutdown()
     {
-        m_SoundImpl->shutdown();
+        m_SoundImpl->Shutdown();
     }
 }

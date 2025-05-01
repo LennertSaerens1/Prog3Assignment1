@@ -5,16 +5,16 @@
 
 namespace dae
 {
-    using sound_id = unsigned short;
+    using SoundId = unsigned short;
 
     class ISoundSystem
     {
     public:
         virtual ~ISoundSystem() = default;
 
-        virtual sound_id loadSound(const std::string& filepath) = 0;
-        virtual void play(sound_id id, float volume, bool loop = false) = 0;
-        virtual void shutdown() = 0;
+        virtual SoundId LoadSound(const std::string& filepath) = 0;
+        virtual void Play(SoundId id, float volume, bool loop = false) = 0;
+        virtual void Shutdown() = 0;
     };
 
     class SoundSystem final : public ISoundSystem
@@ -23,9 +23,9 @@ namespace dae
         SoundSystem();
         ~SoundSystem() override;
 
-        sound_id loadSound(const std::string& filepath) override;
-        void play(sound_id id, float volume, bool loop = false) override;
-        void shutdown() override;
+        SoundId LoadSound(const std::string& filepath) override;
+        void Play(SoundId id, float volume, bool loop = false) override;
+        void Shutdown() override;
 
         SoundSystem(const SoundSystem&) = delete;
         SoundSystem& operator=(const SoundSystem&) = delete;
@@ -43,8 +43,8 @@ namespace dae
         NullSoundSystem() = default;
         ~NullSoundSystem() override = default;
 
-        sound_id loadSound(const std::string&) override { return 0; }
-        void play(sound_id , float , bool  = false) override {}
-        void shutdown() override {}
+        SoundId LoadSound(const std::string&) override { return 0; }
+        void Play(SoundId , float , bool  = false) override {}
+        void Shutdown() override {}
     };
 }
