@@ -4,6 +4,13 @@
 #include "Command.h"
 
 namespace dae {
+	enum Direction
+	{
+		Up,
+		Down,
+		Left,
+		Right
+	};
 	
 	class GameObjectCommand : public Command {
 		GameObject* m_actor;
@@ -16,20 +23,36 @@ namespace dae {
 
 	class MoveCommand : public GameObjectCommand {
 	public:
-		MoveCommand(float speed, glm::vec2 dir, GameObject* actor)
+		MoveCommand(Direction dir, GameObject* actor)
 			: GameObjectCommand(actor)
-			, m_movementSpeed{ speed }
 			, m_direction{ dir }
 		{
 		}
-		void Execute(float elapsedSec) override
+		void Execute(float ) override
 		{
 			auto owner = GetGameObject();
-			owner->AddWorldOffset(glm::vec3(m_direction.x * m_movementSpeed * elapsedSec, m_direction.y * m_movementSpeed * elapsedSec, 0));
+			auto pacMan = owner->getComponent<PacManCharacter>();
+
+			switch (m_direction)
+			{
+			case dae::Up:
+				pacMan->SetState(PacManState::m_upState.get());
+				break;
+			case dae::Down:
+				pacMan->SetState(PacManState::m_downState.get());				
+				break;
+			case dae::Left:
+				pacMan->SetState(PacManState::m_leftState.get());			
+				break;
+			case dae::Right:
+				pacMan->SetState(PacManState::m_rightState.get());				
+				break;
+			default:
+				break;
+			}
 		}
 	private:
-		float m_movementSpeed;
-		glm::vec2 m_direction;
+		Direction m_direction;
 	};
 
 	class DieCommand : public GameObjectCommand {
