@@ -1,6 +1,7 @@
 #pragma once
 #include "RenderComponent.h"
 #include "SoundSystem.h"
+#include "GridComponent.h"
 
 namespace dae
 {
@@ -74,7 +75,7 @@ namespace dae
         public RenderComponent
     {
 	public:
-		PacManCharacter(GameObject& gameObject, bool isMale = true);
+		PacManCharacter(GameObject& gameObject, GridComponent* pGridComponent, bool isMale = true);
         ~PacManCharacter();
         void DecreaseLives();
 		void AddScore(int score);
@@ -100,6 +101,11 @@ namespace dae
 			return m_pacManState;
 		}
 
+        bool CanMoveUp() const;
+		bool CanMoveDown() const;
+		bool CanMoveLeft() const;
+		bool CanMoveRight() const;
+
 		void MoveLeft(float deltaTime);
 		void MoveRight(float deltaTime);
 		void MoveUp(float deltaTime);
@@ -110,13 +116,14 @@ namespace dae
     private:
         int m_lives;
 		int m_score;
-        dae::SoundId m_loopingId;
 		float m_movementSpeed;
 
         PacManState* m_pacManState;
 		float m_spriteTimer;
 		float m_spriteInterval;
 		int m_spriteIndex;
+
+		GridComponent* m_pGridComponent;
     };
 }
 

@@ -9,8 +9,8 @@
 
 namespace dae
 {
-    GridComponent::GridComponent(GameObject& owner, int width, int height)
-        : Component(owner), m_Width(width), m_Height(height), m_Grid(height, std::vector<Cell>(width))
+    GridComponent::GridComponent(GameObject& owner, int width, int height, int gridWidthInPixels, int gridHeightInPixels)
+        : Component(owner), m_Width(width), m_Height(height), m_GridWidthInPixels(gridWidthInPixels), m_GridHeightInPixels(gridHeightInPixels), m_Grid(height, std::vector<Cell>(width))
     {
     }
 
@@ -21,6 +21,67 @@ namespace dae
             throw std::out_of_range("Grid coordinates out of bounds");
         }
         return m_Grid[y][x];
+    }
+
+    const GridComponent::Cell& GridComponent::GetCellFromWorldPos(const utils::Vector2f& worldPos) const
+    {
+		const int cellSize = GetCellSize(); // Size of each grid cell in pixels
+		int x = static_cast<int>((worldPos.x - GetOwner()->GetWorldPosition().x) / cellSize);
+		int y = static_cast<int>((worldPos.y - GetOwner()->GetWorldPosition().y) / cellSize);
+		if (x < 0 || x >= m_Width || y < 0 || y >= m_Height)
+		{
+			throw std::out_of_range("Grid coordinates out of bounds");
+		}
+		return m_Grid[y][x];
+        
+    }
+
+    const GridComponent::Cell& GridComponent::GetRightCellFromWorldPos(const utils::Vector2f& worldPos) const
+    {
+        const int cellSize = GetCellSize(); // Size of each grid cell in pixels
+        int x = static_cast<int>((worldPos.x - GetOwner()->GetWorldPosition().x) / cellSize);
+        int y = static_cast<int>((worldPos.y - GetOwner()->GetWorldPosition().y) / cellSize);
+        if (x < 0 || x >= m_Width || y < 0 || y >= m_Height)
+        {
+            throw std::out_of_range("Grid coordinates out of bounds");
+        }
+        return m_Grid[y][x+1];
+    }
+
+    const GridComponent::Cell& GridComponent::GetLeftCellFromWorldPos(const utils::Vector2f& worldPos) const
+    {
+        const int cellSize = GetCellSize(); // Size of each grid cell in pixels
+        int x = static_cast<int>((worldPos.x - GetOwner()->GetWorldPosition().x) / cellSize);
+        int y = static_cast<int>((worldPos.y - GetOwner()->GetWorldPosition().y) / cellSize);
+        if (x < 0 || x >= m_Width || y < 0 || y >= m_Height)
+        {
+            throw std::out_of_range("Grid coordinates out of bounds");
+        }
+        return m_Grid[y][x-1];
+    }
+
+    const GridComponent::Cell& GridComponent::GetUpCellFromWorldPos(const utils::Vector2f& worldPos) const
+    {
+        const int cellSize = GetCellSize(); // Size of each grid cell in pixels
+        int x = static_cast<int>((worldPos.x - GetOwner()->GetWorldPosition().x) / cellSize);
+        int y = static_cast<int>((worldPos.y - GetOwner()->GetWorldPosition().y) / cellSize);
+        if (x < 0 || x >= m_Width || y < 0 || y >= m_Height)
+        {
+            throw std::out_of_range("Grid coordinates out of bounds");
+        }
+        return m_Grid[y-1][x];
+    }
+
+    const GridComponent::Cell& GridComponent::GetDownCellFromWorldPos(const utils::Vector2f& worldPos) const
+    {
+        const int cellSize = GetCellSize(); // Size of each grid cell in pixels
+        int x = static_cast<int>((worldPos.x - GetOwner()->GetWorldPosition().x) / cellSize);
+        int y = static_cast<int>((worldPos.y - GetOwner()->GetWorldPosition().y) / cellSize);
+        if (x < 0 || x >= m_Width || y < 0 || y >= m_Height)
+        {
+            throw std::out_of_range("Grid coordinates out of bounds");
+        }
+        return m_Grid[y+1][x];
     }
 
     void GridComponent::SetCell(int x, int y, const Cell& cell)
@@ -59,7 +120,7 @@ namespace dae
             throw std::out_of_range("Grid coordinates out of bounds");
         }
 
-        const float cellSize = (224 * 3) / 28; // Size of each grid cell in pixels
+        const int cellSize = GetCellSize(); // Size of each grid cell in pixels
         utils::Vector2f worldPosition;
 		auto world = GetOwner()->GetWorldPosition();
         worldPosition.x = x * cellSize + world.x;
@@ -74,7 +135,7 @@ namespace dae
             throw std::out_of_range("Grid coordinates out of bounds");
         }
 
-        const float cellSize = (224 * 3) / 28; // Size of each grid cell in pixels
+        const int cellSize = GetCellSize(); // Size of each grid cell in pixels
         utils::Vector2f worldPosition;
         auto world = GetOwner()->GetWorldPosition();
         worldPosition.x = x * cellSize + world.x + cellSize/2;
@@ -95,7 +156,7 @@ namespace dae
     void GridComponent::Render(float x, float y) const
     {
         // Debug rendering logic
-        const float cellSize = (224 * 3) / 28; // Size of each grid cell in pixels
+        const int cellSize = GetCellSize(); // Size of each grid cell in pixels
         auto& renderer = dae::Renderer::GetInstance();
 
         // Enable blending for transparency

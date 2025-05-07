@@ -36,15 +36,19 @@ namespace dae {
 			switch (m_direction)
 			{
 			case dae::Up:
+				if (!pacMan->CanMoveUp()) return;
 				pacMan->SetState(PacManState::m_upState.get());
 				break;
 			case dae::Down:
+				if (!pacMan->CanMoveDown()) return;
 				pacMan->SetState(PacManState::m_downState.get());				
 				break;
 			case dae::Left:
+				if (!pacMan->CanMoveLeft()) return;
 				pacMan->SetState(PacManState::m_leftState.get());			
 				break;
 			case dae::Right:
+				if (!pacMan->CanMoveRight()) return;
 				pacMan->SetState(PacManState::m_rightState.get());				
 				break;
 			default:

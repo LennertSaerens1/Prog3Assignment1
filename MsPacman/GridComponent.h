@@ -17,10 +17,25 @@ namespace dae
             bool isGate{ false };       // Is this cell a gate to the other side?
         };
 
-        GridComponent(GameObject& owner, int width, int height);
+        GridComponent(GameObject& owner, int width, int height, int gridWidthInPixels, int gridHeightInPixels);
 
         // Accessors
         const Cell& GetCell(int x, int y) const;
+        const Cell& GetCellFromWorldPos(const utils::Vector2f& worldPos) const;
+
+		int GetCellSize() const
+		{
+            const int cellSizeX = m_GridWidthInPixels / m_Width;  // Cell width in pixels
+			return cellSizeX;
+		}
+
+        const Cell& GetRightCellFromWorldPos(const utils::Vector2f& worldPos) const;
+		const Cell& GetLeftCellFromWorldPos(const utils::Vector2f& worldPos) const;
+		const Cell& GetUpCellFromWorldPos(const utils::Vector2f& worldPos) const;
+		const Cell& GetDownCellFromWorldPos(const utils::Vector2f& worldPos) const;
+
+
+
         void SetCell(int x, int y, const Cell& cell);
 
         // Utility methods
@@ -46,6 +61,8 @@ namespace dae
     private:
         int m_Width;
         int m_Height;
+		int m_GridWidthInPixels;  // Width of the grid in pixels
+		int m_GridHeightInPixels; // Height of the grid in pixels
         std::vector<std::vector<Cell>> m_Grid; // 2D grid of cells
     };
 }
