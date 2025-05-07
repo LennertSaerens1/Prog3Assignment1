@@ -75,28 +75,28 @@ namespace dae
 	{
 		int cellSize = m_pGridComponent->GetCellSize();
 		utils::Vector2f middlePos = GetMiddlePosition();
-		return m_pGridComponent->GetUpCellFromWorldPos(utils::Vector2f(middlePos.x - cellSize/2 +1, middlePos.y + cellSize / 2)).isWalkable && m_pGridComponent->GetUpCellFromWorldPos(utils::Vector2f(middlePos.x + cellSize / 2 , middlePos.y + cellSize / 2)).isWalkable;
+		return m_pGridComponent->GetUpCellFromWorldPos(utils::Vector2f(middlePos.x - cellSize/2 +1, middlePos.y + cellSize / 2)).isWalkable && m_pGridComponent->GetUpCellFromWorldPos(utils::Vector2f(middlePos.x + cellSize / 2 -1, middlePos.y + cellSize / 2)).isWalkable;
 	}
 
 	bool PacManCharacter::CanMoveDown() const
 	{
 		int cellSize = m_pGridComponent->GetCellSize();
 		utils::Vector2f middlePos = GetMiddlePosition();
-		return m_pGridComponent->GetDownCellFromWorldPos(utils::Vector2f(middlePos.x - cellSize/2 +1, middlePos.y - cellSize / 2)).isWalkable && m_pGridComponent->GetDownCellFromWorldPos(utils::Vector2f(middlePos.x + cellSize / 2 , middlePos.y - cellSize / 2)).isWalkable;
+		return m_pGridComponent->GetDownCellFromWorldPos(utils::Vector2f(middlePos.x - cellSize/2 +1, middlePos.y - cellSize / 2)).isWalkable && m_pGridComponent->GetDownCellFromWorldPos(utils::Vector2f(middlePos.x + cellSize / 2 -1, middlePos.y - cellSize / 2)).isWalkable;
 	}
 
 	bool PacManCharacter::CanMoveLeft() const
 	{
 		int cellSize = m_pGridComponent->GetCellSize();
 		utils::Vector2f middlePos = GetMiddlePosition();
-		return m_pGridComponent->GetLeftCellFromWorldPos(utils::Vector2f(middlePos.x + cellSize / 2, middlePos.y - cellSize/2 +1)).isWalkable && m_pGridComponent->GetLeftCellFromWorldPos(utils::Vector2f(middlePos.x + cellSize / 2, middlePos.y + cellSize / 2)).isWalkable;
+		return m_pGridComponent->GetLeftCellFromWorldPos(utils::Vector2f(middlePos.x + cellSize / 2, middlePos.y - cellSize/2 +1)).isWalkable && m_pGridComponent->GetLeftCellFromWorldPos(utils::Vector2f(middlePos.x + cellSize / 2, middlePos.y + cellSize / 2-1)).isWalkable;
 	}
 
 	bool PacManCharacter::CanMoveRight() const
 	{
 		int cellSize = m_pGridComponent->GetCellSize();
 		utils::Vector2f middlePos = GetMiddlePosition();
-		return m_pGridComponent->GetRightCellFromWorldPos(utils::Vector2f(middlePos.x - cellSize / 2, middlePos.y - cellSize/2 +1)).isWalkable && m_pGridComponent->GetRightCellFromWorldPos(utils::Vector2f(middlePos.x - cellSize / 2, middlePos.y + cellSize / 2 )).isWalkable;
+		return m_pGridComponent->GetRightCellFromWorldPos(utils::Vector2f(middlePos.x - cellSize / 2, middlePos.y - cellSize/2 +1)).isWalkable && m_pGridComponent->GetRightCellFromWorldPos(utils::Vector2f(middlePos.x - cellSize / 2, middlePos.y + cellSize / 2 -1)).isWalkable;
 	}
 
 	void PacManCharacter::MoveLeft(float deltaTime)
