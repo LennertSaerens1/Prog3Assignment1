@@ -1,5 +1,6 @@
 #pragma once
 #include "TextObject.h"
+#include "RenderComponent.h"
 #include "Observer.h"
 namespace dae
 {
@@ -12,7 +13,7 @@ namespace dae
 		LivesDisplayObserver(GameObject* textToUpdate);
 		virtual ~LivesDisplayObserver() = default;
     private:
-		TextComponent* m_livesTextComp;
+		RenderComponent* m_livesRenderComp;
     };
 
     class ScoreDisplayObserver :

@@ -3,6 +3,8 @@
 #include "Texture2D.h"
 #include "Renderer.h"
 #include <stdexcept>
+#include <filesystem>
+#include <iostream>
 
 dae::Texture2D::~Texture2D()
 {
@@ -23,6 +25,7 @@ SDL_Texture* dae::Texture2D::GetSDLTexture() const
 
 dae::Texture2D::Texture2D(const std::string &fullPath)
 {
+	std::cout << std::filesystem::current_path();
 	m_texture = IMG_LoadTexture(Renderer::GetInstance().GetSDLRenderer(), fullPath.c_str());
 	if (m_texture == nullptr)
 		throw std::runtime_error(std::string("Failed to load texture: ") + SDL_GetError());

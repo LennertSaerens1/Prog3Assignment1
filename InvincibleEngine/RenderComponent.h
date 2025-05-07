@@ -4,6 +4,8 @@
 #include "GameObject.h"
 #include "Transform.h"
 #include "Font.h"
+#include "Utils.h"
+using namespace utils;
 
 namespace dae
 {
@@ -15,12 +17,13 @@ namespace dae
 		void Update(const float deltaTime) override;
 		void FixedUpdate(const float fixedTime) override;
 		void Render(float x, float y) const override;
-		void Render(float x, float y,  float Width, float Height) const;
-		void Render(float x, float y, float scrX, float srcY, float srcWidth, float srcHeight) const;
 		void ImGuiRender() override;
 
 
 		void SetTexture(const std::string& filePath);
+
+		void SetSrcRect(const Rect& srcRect) { m_SrcRect = srcRect; };
+		void SetDestRect(const Rect& destRect) { m_DestRect = destRect; };
 
 		RenderComponent(GameObject& owner);
 		RenderComponent(const std::string& filePath, GameObject& owner);
@@ -29,10 +32,11 @@ namespace dae
 		RenderComponent(RenderComponent&& other) = delete;
 		RenderComponent& operator=(const RenderComponent& other) = delete;
 		RenderComponent& operator=(RenderComponent&& other) = delete;
-	private:
+	protected:
 		bool m_needsUpdate;
 		std::shared_ptr<dae::Texture2D> m_Texture;
-
+		Rect m_SrcRect{};
+		Rect m_DestRect{};
 	};
 }
 

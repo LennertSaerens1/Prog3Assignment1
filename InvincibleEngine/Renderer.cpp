@@ -76,29 +76,12 @@ void dae::Renderer::RenderTexture(const Texture2D& texture, const float x, const
 	SDL_RenderCopy(GetSDLRenderer(), texture.GetSDLTexture(), nullptr, &dst);
 }
 
-void dae::Renderer::RenderTexture(const Texture2D& texture, const float x, const float y, const float width, const float height) const
+void dae::Renderer::RenderTexture(const Texture2D& texture, const SDL_Rect* srcRect, const SDL_Rect* destRect) const
 {
-	SDL_Rect dst{};
-	dst.x = static_cast<int>(x);
-	dst.y = static_cast<int>(y);
-	dst.w = static_cast<int>(width);
-	dst.h = static_cast<int>(height);
-	SDL_RenderCopy(GetSDLRenderer(), texture.GetSDLTexture(), nullptr, &dst);
-}
-
-void dae::Renderer::RenderTexture(const Texture2D& texture, float x, float y, float scrX, float srcY, float srcWidth, float srcHeight) const
-{
-	SDL_Rect dst{};
-	dst.x = static_cast<int>(x);
-	dst.y = static_cast<int>(y);
-	dst.w = static_cast<int>(srcWidth);
-	dst.h = static_cast<int>(srcHeight);
-	SDL_Rect src{};
-	src.x = static_cast<int>(scrX);
-	src.y = static_cast<int>(srcY);
-	src.w = static_cast<int>(srcWidth);
-	src.h = static_cast<int>(srcHeight);
-	SDL_RenderCopy(GetSDLRenderer(), texture.GetSDLTexture(), &src, &dst);
+	if (SDL_RenderCopy(m_renderer, texture.GetSDLTexture(), srcRect, destRect) != 0)
+	{
+		throw std::runtime_error(std::string("Failed to render texture: ") + SDL_GetError());
+	}
 }
 
 SDL_Renderer* dae::Renderer::GetSDLRenderer() const { return m_renderer; }

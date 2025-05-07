@@ -15,6 +15,8 @@ namespace dae
         virtual SoundId LoadSound(const std::string& filepath) = 0;
         virtual void Play(SoundId id, float volume, bool loop = false) = 0;
         virtual void Shutdown() = 0;
+		virtual void StopAllSounds() = 0;
+		virtual void StopSound(SoundId id) = 0;
     };
 
     class SoundSystem final : public ISoundSystem
@@ -26,6 +28,8 @@ namespace dae
         SoundId LoadSound(const std::string& filepath) override;
         void Play(SoundId id, float volume, bool loop = false) override;
         void Shutdown() override;
+        void StopAllSounds() override;
+        void StopSound(SoundId id) override;
 
         SoundSystem(const SoundSystem&) = delete;
         SoundSystem& operator=(const SoundSystem&) = delete;
@@ -46,5 +50,7 @@ namespace dae
         SoundId LoadSound(const std::string&) override { return 0; }
         void Play(SoundId , float , bool  = false) override {}
         void Shutdown() override {}
+		void StopAllSounds() override {}
+		void StopSound(SoundId) override {}
     };
 }

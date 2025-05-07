@@ -15,27 +15,33 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\InvincibleEngine\Main.cpp">
+    <ClCompile Include="GridComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\InvincibleEngine\Commands.cpp">
+    <ClCompile Include="Commands.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\InvincibleEngine\Displays.cpp">
+    <ClCompile Include="Displays.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\InvincibleEngine\PacManCharacters.cpp">
+    <ClCompile Include="Main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PacManCharacters.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\InvincibleEngine\Commands.h">
+    <ClInclude Include="GridComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\InvincibleEngine\Displays.h">
+    <ClInclude Include="Commands.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\InvincibleEngine\PacManCharacters.h">
+    <ClInclude Include="Displays.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PacManCharacters.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

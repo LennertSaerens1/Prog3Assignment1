@@ -8,14 +8,36 @@ void dae::LivesDisplayObserver::Notify(GameEvent event, GameObject* actor)
 	{
 	case GameEvent::PlayerDied:
 		auto lives = actor->getComponent<PacManCharacter>()->GetLives();
-		m_livesTextComp->SetText("# Lives: " + std::to_string(lives));
+		switch (lives)
+		{
+		case 5:
+			m_livesRenderComp->SetSrcRect(utils::Rect{ 696, 96, 80, 16 });
+			break;
+		case 4:
+			m_livesRenderComp->SetSrcRect(utils::Rect{ 696, 112, 80, 16 });
+			break;
+		case 3:
+			m_livesRenderComp->SetSrcRect(utils::Rect{ 696, 128, 80, 16 });
+			break;
+		case 2:
+			m_livesRenderComp->SetSrcRect(utils::Rect{ 696, 144, 80, 16 });
+			break;
+		case 1:
+			m_livesRenderComp->SetSrcRect(utils::Rect{ 696, 160, 80, 16 });
+			break;
+		case 0:
+			m_livesRenderComp->SetSrcRect(utils::Rect{ 560, 60, 80, 16 });
+			break;
+		default:
+			break;
+		}
 		break;
 	}
 }
 
 dae::LivesDisplayObserver::LivesDisplayObserver(GameObject* textToUpdate)
 {
-	m_livesTextComp = textToUpdate->getComponent<TextComponent>();
+	m_livesRenderComp = textToUpdate->getComponent<RenderComponent>();
 }
 
 dae::ScoreDisplayObserver::ScoreDisplayObserver(GameObject* textToUpdate)
@@ -29,7 +51,7 @@ void dae::ScoreDisplayObserver::Notify(GameEvent event, GameObject* actor)
 	{
 	case GameEvent::PlayerScored:
 		auto score = actor->getComponent<PacManCharacter>()->GetScore();
-		m_scoreTextComp->SetText("Score: " + std::to_string(score));
+		m_scoreTextComp->SetText(std::to_string(score));
 		break;
 	}
 }

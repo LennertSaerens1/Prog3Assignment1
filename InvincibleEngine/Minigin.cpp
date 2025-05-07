@@ -52,11 +52,11 @@ dae::InvincibleEngine::InvincibleEngine(const std::string &dataPath)
 	}
 
 	g_window = SDL_CreateWindow(
-		"Programming 4 assignment",
+		"MsPacMan",
 		SDL_WINDOWPOS_CENTERED,
 		SDL_WINDOWPOS_CENTERED,
-		640,
-		480,
+		224 * 3,
+		248 * 3 + 200,
 		SDL_WINDOW_OPENGL
 	);
 	if (g_window == nullptr) 

@@ -18,7 +18,8 @@ dae::RenderComponent::RenderComponent(const std::string& filePath, GameObject& o
 
 void dae::RenderComponent::Update(const float )
 {
-	
+    m_DestRect.position.x = GetOwner()->GetWorldPosition().x;
+    m_DestRect.position.y = GetOwner()->GetWorldPosition().y;
 }
 
 void dae::RenderComponent::FixedUpdate(const float )
@@ -28,26 +29,33 @@ void dae::RenderComponent::FixedUpdate(const float )
 
 void dae::RenderComponent::Render(float x, float y) const
 {
-	if (m_Texture != nullptr)
-	{
-		dae::Renderer::GetInstance().RenderTexture(*m_Texture, x, y);
-	}
-}
+    if (m_Texture != nullptr)
+    {
+        // Check if m_SrcRect and m_DestRect are not (0, 0)
+        if (m_SrcRect.width != 0 && m_SrcRect.height != 0 && m_DestRect.width != 0 && m_DestRect.height != 0)
+        {
+            SDL_Rect src{
+                static_cast<int>(m_SrcRect.position.x),
+                static_cast<int>(m_SrcRect.position.y),
+                static_cast<int>(m_SrcRect.width),
+                static_cast<int>(m_SrcRect.height)
+            };
 
-void dae::RenderComponent::Render(float x, float y, float Width, float Height) const
-{
-	if (m_Texture != nullptr)
-	{
-		dae::Renderer::GetInstance().RenderTexture(*m_Texture, x, y, Width, Height);
-	}
-}
+            SDL_Rect dest{
+                static_cast<int>(m_DestRect.position.x),
+                static_cast<int>(m_DestRect.position.y),
+                static_cast<int>(m_DestRect.width),
+                static_cast<int>(m_DestRect.height)
+            };
 
-void dae::RenderComponent::Render(float x, float y, float srcX, float srcY, float srcWidth, float srcHeight) const
-{
-	if (m_Texture != nullptr)
-	{
-		dae::Renderer::GetInstance().RenderTexture(*m_Texture, x, y,srcX,srcY, srcWidth, srcHeight);
-	}
+            dae::Renderer::GetInstance().RenderTexture(*m_Texture, &src, &dest);
+        }
+        else
+        {
+            // Default rendering if m_SrcRect or m_DestRect are (0, 0)
+            dae::Renderer::GetInstance().RenderTexture(*m_Texture, x, y);
+        }
+    }
 }
 
 void dae::RenderComponent::ImGuiRender()

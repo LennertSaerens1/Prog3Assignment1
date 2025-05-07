@@ -58,6 +58,31 @@ namespace dae
             m_Condition.notify_one();
         }
 
+        void StopAllSounds()
+        {
+            // Stop all sounds on all channels
+            Mix_HaltChannel(-1);
+        }
+
+        void StopSound(SoundId id)
+        {
+            std::lock_guard<std::mutex> lock(m_Mutex);
+
+            // Find the sound by ID
+            auto it = m_Sounds.find(id);
+            if (it != m_Sounds.end())
+            {
+                // Stop all channels playing this specific sound
+                for (int channel = 0; channel < Mix_AllocateChannels(-1); ++channel)
+                {
+                    if (Mix_GetChunk(channel) == it->second)
+                    {
+                        Mix_HaltChannel(channel);
+                    }
+                }
+            }
+        }
+
         void Shutdown()
         {
             if (!m_Running) return;
@@ -154,6 +179,16 @@ namespace dae
     void SoundSystem::Play(const SoundId id, float volume, bool loop)
     {
         m_SoundImpl->Play(id, volume, loop);
+    }
+
+    void SoundSystem::StopAllSounds()
+    {
+        m_SoundImpl->StopAllSounds();
+    }
+
+    void SoundSystem::StopSound(SoundId id)
+    {
+        m_SoundImpl->StopSound(id);
     }
 
     void SoundSystem::Shutdown()
