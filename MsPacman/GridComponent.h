@@ -4,6 +4,7 @@
 #include <vector>
 #include "Utils.h"
 #include <string>
+#include "PacManCharacters.h"
 
 namespace dae
 {
@@ -39,6 +40,9 @@ namespace dae
 		const Cell& GetLeftCellFromWorldPos(const utils::Vector2f& worldPos) const;
 		const Cell& GetUpCellFromWorldPos(const utils::Vector2f& worldPos) const;
 		const Cell& GetDownCellFromWorldPos(const utils::Vector2f& worldPos) const;
+
+		const int GetCellXFromWorld(const utils::Vector2f& worldPos) const;
+		const int GetCellYFromWorld(const utils::Vector2f& worldPos) const;
 
 		void PickUpPellet(int x, int y);
 		void PickUpPellet(Cell& cell);

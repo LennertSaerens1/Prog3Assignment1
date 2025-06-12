@@ -111,6 +111,9 @@ namespace dae
 
 	bool PacManCharacter::CanMoveLeft() const
 	{
+		if (GetMiddlePosition().x < m_pGridComponent->GetWidth() || GetMiddlePosition().x >(m_pGridComponent->GetWidth() - 1) * m_pGridComponent->GetCellSize())
+			return false;
+
 		int cellSize = m_pGridComponent->GetCellSize()-1;
 		utils::Vector2f middlePos = GetMiddlePosition();
 		return m_pGridComponent->GetLeftCellFromWorldPos(utils::Vector2f(middlePos.x + cellSize / 2, middlePos.y)).isWalkable;
@@ -119,6 +122,9 @@ namespace dae
 
 	bool PacManCharacter::CanMoveRight() const
 	{
+		if (GetMiddlePosition().x < m_pGridComponent->GetWidth() || GetMiddlePosition().x >(m_pGridComponent->GetWidth() - 1) * m_pGridComponent->GetCellSize())
+			return false;
+
 		int cellSize = m_pGridComponent->GetCellSize()-1;
 		utils::Vector2f middlePos = GetMiddlePosition();
 		return m_pGridComponent->GetRightCellFromWorldPos(utils::Vector2f(middlePos.x - cellSize / 2, middlePos.y)).isWalkable;
@@ -148,16 +154,21 @@ namespace dae
 				switch (m_spriteIndex)
 				{
 				case 0:
-					SetSrcRect(utils::Rect{ 456, 17, 15, 15 });
+					SetSrcRect(utils::Rect{ 456, 17 + 143.f*m_isMale, 15, 15 });
 					break;
 				case 1:
-					SetSrcRect(utils::Rect{ 472, 17, 15, 15 });
+					SetSrcRect(utils::Rect{ 472, 17 + 143.f * m_isMale, 15, 15 });
 					break;
 				case 2:
-					SetSrcRect(utils::Rect{ 488, 17, 15, 15 });
+					SetSrcRect(utils::Rect{ 488, 17 + 143.f * m_isMale, 15, 15 });
+					if (m_isMale)
+					{
+						SetSrcRect(utils::Rect{ 488, 1 + 143.f * m_isMale, 15, 15 });
+					}
 					break;
 				case 3:
-					SetSrcRect(utils::Rect{ 472, 17, 15, 15 });
+					SetSrcRect(utils::Rect{ 472, 17 + 143.f * m_isMale, 15, 15 });
+
 					break;
 				default:
 					std::cerr << "Invalid sprite index" << std::endl;
@@ -188,16 +199,20 @@ namespace dae
 				switch (m_spriteIndex)
 				{
 				case 0:
-					SetSrcRect(utils::Rect{ 456, 17, 15, 15 });
+					SetSrcRect(utils::Rect{ 456, 17 + 143.f * m_isMale, 15, 15 });
 					break;
 				case 1:
-					SetSrcRect(utils::Rect{ 472, 17, 15, 15 });
+					SetSrcRect(utils::Rect{ 472, 17 + 143.f * m_isMale, 15, 15 });
 					break;
 				case 2:
-					SetSrcRect(utils::Rect{ 488, 17, 15, 15 });
+					SetSrcRect(utils::Rect{ 488, 17 + 143.f * m_isMale, 15, 15 });
+					if (m_isMale)
+					{
+						SetSrcRect(utils::Rect{ 488, 1 + 143.f * m_isMale, 15, 15 });
+					}
 					break;
 				case 3:
-					SetSrcRect(utils::Rect{ 472, 17, 15, 15 });
+					SetSrcRect(utils::Rect{ 472, 17 + 143.f * m_isMale, 15, 15 });
 					break;
 				default:
 					std::cerr << "Invalid sprite index" << std::endl;
@@ -232,16 +247,20 @@ namespace dae
 				switch (m_spriteIndex)
 				{
 				case 0:
-					SetSrcRect(utils::Rect{ 456, 1, 15, 15 });
+					SetSrcRect(utils::Rect{ 456, 1 + 143.f * m_isMale, 15, 15 });
 					break;
 				case 1:
-					SetSrcRect(utils::Rect{ 472, 1, 15, 15 });
+					SetSrcRect(utils::Rect{ 472, 1 + 143.f * m_isMale, 15, 15 });
 					break;
 				case 2:
-					SetSrcRect(utils::Rect{ 488, 1, 15, 15 });
+					SetSrcRect(utils::Rect{ 488, 1 + 143.f * m_isMale, 15, 15 });
+					if (m_isMale)
+					{
+						SetSrcRect(utils::Rect{ 488, 1 + 143.f * m_isMale, 15, 15 });
+					}
 					break;
 				case 3:
-					SetSrcRect(utils::Rect{ 472, 1, 15, 15 });
+					SetSrcRect(utils::Rect{ 472, 1 + 143.f * m_isMale, 15, 15 });
 					break;
 				default:
 					std::cerr << "Invalid sprite index" << std::endl;
@@ -272,16 +291,20 @@ namespace dae
 				switch (m_spriteIndex)
 				{
 				case 0:
-					SetSrcRect(utils::Rect{ 456, 1, 15, 15 });
+					SetSrcRect(utils::Rect{ 456, 1 + 143.f * m_isMale, 15, 15 });
 					break;
 				case 1:
-					SetSrcRect(utils::Rect{ 472, 1, 15, 15 });
+					SetSrcRect(utils::Rect{ 472, 1 + 143.f * m_isMale, 15, 15 });
 					break;
 				case 2:
-					SetSrcRect(utils::Rect{ 488, 1, 15, 15 });
+					SetSrcRect(utils::Rect{ 488, 1 + 143.f * m_isMale, 15, 15 });
+					if (m_isMale)
+					{
+						SetSrcRect(utils::Rect{ 488, 1 + 143.f * m_isMale, 15, 15 });
+					}
 					break;
 				case 3:
-					SetSrcRect(utils::Rect{ 472, 1, 15, 15 });
+					SetSrcRect(utils::Rect{ 472, 1 + 143.f * m_isMale, 15, 15 });
 					break;
 				default:
 					std::cerr << "Invalid sprite index" << std::endl;
@@ -316,16 +339,20 @@ namespace dae
 				switch (m_spriteIndex)
 				{
 				case 0:
-					SetSrcRect(utils::Rect{ 456, 33, 15, 15 });
+					SetSrcRect(utils::Rect{ 456, 33 + 143.f * m_isMale, 15, 15 });
 					break;
 				case 1:
-					SetSrcRect(utils::Rect{ 472, 33, 15, 15 });
+					SetSrcRect(utils::Rect{ 472, 33 + 143.f * m_isMale, 15, 15 });
 					break;
 				case 2:
-					SetSrcRect(utils::Rect{ 488, 33, 15, 15 });
+					SetSrcRect(utils::Rect{ 488, 33 + 143.f * m_isMale, 15, 15 });
+					if (m_isMale)
+					{
+						SetSrcRect(utils::Rect{ 488, 1 + 143.f * m_isMale, 15, 15 });
+					}
 					break;
 				case 3:
-					SetSrcRect(utils::Rect{ 472, 33, 15, 15 });
+					SetSrcRect(utils::Rect{ 472, 33 + 143.f * m_isMale, 15, 15 });
 					break;
 				default:
 					std::cerr << "Invalid sprite index" << std::endl;
@@ -361,16 +388,20 @@ namespace dae
 				switch (m_spriteIndex)
 				{
 				case 0:
-					SetSrcRect(utils::Rect{ 456, 49, 15, 15 });
+					SetSrcRect(utils::Rect{ 456, 49 + 143.f * m_isMale, 15, 15 });
 					break;
 				case 1:
-					SetSrcRect(utils::Rect{ 472, 49, 15, 15 });
+					SetSrcRect(utils::Rect{ 472, 49 + 143.f * m_isMale, 15, 15 });
 					break;
 				case 2:
-					SetSrcRect(utils::Rect{ 488, 49, 15, 15 });
+					SetSrcRect(utils::Rect{ 488, 49 + 143.f * m_isMale, 15, 15 });
+					if (m_isMale)
+					{
+						SetSrcRect(utils::Rect{ 488, 1 + 143.f * m_isMale, 15, 15 });
+					}
 					break;
 				case 3:
-					SetSrcRect(utils::Rect{ 472, 49, 15, 15 });
+					SetSrcRect(utils::Rect{ 472, 49 + 143.f * m_isMale, 15, 15 });
 					break;
 				default:
 					std::cerr << "Invalid sprite index" << std::endl;

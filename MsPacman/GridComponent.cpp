@@ -85,6 +85,22 @@ namespace dae
         return m_Grid[y+1][x];
     }
 
+    const int GridComponent::GetCellXFromWorld(const utils::Vector2f& worldPos) const
+    {
+        const int cellSize = GetCellSize(); // Size of each grid cell in pixels
+        int x = static_cast<int>((worldPos.x - GetOwner()->GetWorldPosition().x) / cellSize);
+
+        return x;
+    }
+
+    const int GridComponent::GetCellYFromWorld(const utils::Vector2f& worldPos) const
+    {
+        const int cellSize = GetCellSize(); // Size of each grid cell in pixels
+        int y = static_cast<int>((worldPos.y - GetOwner()->GetWorldPosition().y) / cellSize);
+
+		return y;
+    }
+
     void GridComponent::PickUpPellet(int x, int y)
     {
 		if (x < 0 || x >= m_Width || y < 0 || y >= m_Height)

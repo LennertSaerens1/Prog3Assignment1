@@ -112,7 +112,7 @@ namespace dae
     private:
         int m_lives;
 		int m_score;
-        int m_isMale;
+        bool m_isMale;
 		float m_movementSpeed;
 
         glm::vec3 m_movementDirection;
@@ -125,6 +125,7 @@ namespace dae
 		GridComponent* m_pGridComponent;
 
         PacManCharacter* m_otherPlayer;
+
     };
 }
 
