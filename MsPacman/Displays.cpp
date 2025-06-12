@@ -35,6 +35,11 @@ void dae::LivesDisplayObserver::Notify(GameEvent event, GameObject* actor)
 	}
 }
 
+dae::LevelUpObserver::LevelUpObserver(GameObject* pacMan)
+{
+	m_pacMan = pacMan->getComponent<PacManCharacter>();
+}
+
 dae::LivesDisplayObserver::LivesDisplayObserver(GameObject* textToUpdate)
 {
 	m_livesRenderComp = textToUpdate->getComponent<RenderComponent>();
@@ -52,6 +57,21 @@ void dae::ScoreDisplayObserver::Notify(GameEvent event, GameObject* actor)
 	case GameEvent::PlayerScored:
 		auto score = actor->getComponent<PacManCharacter>()->GetScore();
 		m_scoreTextComp->SetText(std::to_string(score));
+		break;
+	}
+}
+
+void dae::LevelUpObserver::Notify(GameEvent event, GameObject* )
+{
+	switch (event)
+	{
+	case GameEvent::nextLevel:
+		m_pacMan->LevelUp();
+		break;
+	case GameEvent::PlayerDied:
+		//m_pacMan->ResetLevel();
+		break;
+	default:
 		break;
 	}
 }

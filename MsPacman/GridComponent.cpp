@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <iostream>
 #include "GameObject.h"
+#include "PacManCharacters.h"
 #include <fstream>
 #include <stdexcept>
 
@@ -84,6 +85,69 @@ namespace dae
         return m_Grid[y+1][x];
     }
 
+    void GridComponent::PickUpPellet(int x, int y)
+    {
+		if (x < 0 || x >= m_Width || y < 0 || y >= m_Height)
+	    {
+	    	throw std::out_of_range("Grid coordinates out of bounds");
+	    }
+		Cell& cell = m_Grid[y][x];
+		if (cell.hasPellet && cell.pPellet != nullptr)
+		{
+			cell.pPellet->SetActive(false);
+			cell.hasPellet = false;
+			cell.pPellet = nullptr; // Clear the pointer to the pellet
+
+            m_pPacMan->AddScore(10);
+		}
+    }
+
+    void GridComponent::PickUpPellet(Cell& cell)
+    {
+		if (cell.hasPellet && cell.pPellet != nullptr)
+		{
+			cell.pPellet->SetActive(false);
+			cell.hasPellet = false;
+			cell.pPellet = nullptr; // Clear the pointer to the pellet
+
+            m_pPacMan->AddScore(10);
+
+		}
+    }
+
+    void GridComponent::PickUpPowerPill(int x, int y)
+    {
+		if (x < 0 || x >= m_Width || y < 0 || y >= m_Height)
+		{
+			throw std::out_of_range("Grid coordinates out of bounds");
+		}
+		Cell& cell = m_Grid[y][x];
+        if (cell.hasPowerPill && cell.pPowerPill != nullptr)
+        {
+            cell.pPowerPill->SetActive(false);
+            cell.hasPowerPill = false;
+            cell.pPowerPill = nullptr; // Clear the pointer to the power pill
+
+            m_pPacMan->AddScore(50);
+
+			m_PowerActiveTime = 5.0f;
+        }
+    }
+
+    void GridComponent::PickUpPowerPill(Cell& cell)
+    {
+        if (cell.hasPowerPill && cell.pPowerPill != nullptr)
+        {
+            cell.pPowerPill->SetActive(false);
+            cell.hasPowerPill = false;
+            cell.pPowerPill = nullptr; // Clear the pointer to the power pill
+
+            m_pPacMan->AddScore(50);
+            
+			m_PowerActiveTime = 5.0f;
+        }
+    }
+
     void GridComponent::SetCell(int x, int y, const Cell& cell)
     {
         if (x < 0 || x >= m_Width || y < 0 || y >= m_Height)
@@ -143,9 +207,82 @@ namespace dae
         return worldPosition;
     }
 
-    void GridComponent::Update(float )
+    utils::Vector2f GridComponent::GetSnapPos(float x, float y) const
     {
+        const int cellSize = GetCellSize();
+        auto world = GetOwner()->GetWorldPosition();
 
+        // Convert world position to grid cell indices
+        int cellX = static_cast<int>((x - world.x) / cellSize);
+        int cellY = static_cast<int>((y - world.y) / cellSize);
+
+        // Clamp to grid bounds
+        if (cellX < 0) cellX = 0;
+        if (cellX >= m_Width) cellX = m_Width - 1;
+        if (cellY < 0) cellY = 0;
+        if (cellY >= m_Height) cellY = m_Height - 1;
+
+        // Get the center of the cell in world coordinates
+        return GetWorldCoordinatesMiddle(cellX, cellY);
+    }
+
+
+    
+
+    void GridComponent::Update(float deltaTime)
+    {
+        // Remove inactive pellets from the vector and clear their pointers in the grid
+        auto it = std::remove_if(m_pPellets.begin(), m_pPellets.end(),
+            [this](const std::unique_ptr<Pellet>& pellet)
+            {
+                if (!pellet->IsActive())
+                {
+                    // Find and clear the pointer in the grid
+                    for (int row = 0; row < m_Height; ++row)
+                    {
+                        for (int col = 0; col < m_Width; ++col)
+                        {
+                            if (m_Grid[row][col].pPellet == pellet.get())
+                            {
+                                m_Grid[row][col].pPellet = nullptr;
+                                m_Grid[row][col].hasPellet = false;
+                            }
+                        }
+                    }
+                    return true; // Remove from vector
+                }
+                return false; // Keep in vector
+            });
+        m_pPellets.erase(it, m_pPellets.end());
+
+        // Remove inactive power pills from the vector and clear their pointers in the grid
+        auto it2 = std::remove_if(m_pPowerPills.begin(), m_pPowerPills.end(),
+            [this](const std::unique_ptr<PowerPellet>& powerPill)
+            {
+                if (!powerPill->IsActive())
+                {
+                    // Find and clear the pointer in the grid
+                    for (int row = 0; row < m_Height; ++row)
+                    {
+                        for (int col = 0; col < m_Width; ++col)
+                        {
+                            if (m_Grid[row][col].pPowerPill == powerPill.get())
+                            {
+                                m_Grid[row][col].pPowerPill = nullptr;
+                                m_Grid[row][col].hasPowerPill = false;
+                            }
+                        }
+                    }
+                    return true; // Remove from vector
+                }
+                return false; // Keep in vector
+            });
+        m_pPowerPills.erase(it2, m_pPowerPills.end());
+
+        if (m_PowerActiveTime > 0.0f)
+        {
+            m_PowerActiveTime -= deltaTime;
+        }
     }
 
     void GridComponent::FixedUpdate(float )
@@ -188,11 +325,21 @@ namespace dae
                 {
                     SDL_SetRenderDrawColor(renderer.GetSDLRenderer(), 255, 255, 0, 128); // Yellow (semi-transparent)
                     SDL_RenderFillRect(renderer.GetSDLRenderer(), &rect);
+
+					if (cell.pPowerPill)
+					{
+						cell.pPowerPill->Render();
+					}
                 }
                 if (cell.hasPellet)
                 {
                     SDL_SetRenderDrawColor(renderer.GetSDLRenderer(), 255, 0, 0, 128); // Red (semi-transparent)
                     SDL_RenderFillRect(renderer.GetSDLRenderer(), &rect);
+
+                    if (cell.pPellet)
+                    {
+                        cell.pPellet->Render();
+                    }
                 }
                 if (cell.isGate)
                 {
@@ -272,6 +419,98 @@ namespace dae
         {
             throw std::runtime_error("Grid file is empty");
         }
+
+		AddAllPelletsToScene();
+    }
+
+    void GridComponent::AddAllPelletsToScene()
+    {
+        // Clear previous pellets and pointers
+        m_pPellets.clear();
+        for (int row = 0; row < m_Height; ++row)
+        {
+            for (int col = 0; col < m_Width; ++col)
+            {
+                m_Grid[row][col].pPellet = nullptr;
+            }
+        }
+
+        // Add new pellets
+        for (int row = 0; row < m_Height; ++row)
+        {
+            for (int col = 0; col < m_Width; ++col)
+            {
+                if (m_Grid[row][col].hasPellet)
+                {
+					auto worldPos = GetWorldCoordinatesMiddle(col, row);
+                    auto pellet = std::make_unique<Pellet>(
+                        static_cast<float>(worldPos.x) - m_Width/2,
+                        static_cast<float>(worldPos.y) - m_Height/2,
+                        static_cast<float>(GetWidth()), static_cast<float>(GetHeight())
+                    );
+                    m_pPellets.push_back(std::move(pellet));
+					m_Grid[row][col].pPellet = m_pPellets[m_pPellets.size() - 1].get(); // Store the pointer to the pellet in the cell
+					//std::cout << "Pellet pointer is: " << m_pPellets[m_pPellets.size() - 1].get() << std::endl;
+                }
+            }
+        }
+
+		// clear the power pill pointers
+        for (int row = 0; row < m_Height; ++row)
+        {
+            for (int col = 0; col < m_Width; ++col)
+            {
+                m_Grid[row][col].pPowerPill = nullptr;
+            }
+        }
+
+		// Add new power pills
+		for (int row = 0; row < m_Height; ++row)
+		{
+			for (int col = 0; col < m_Width; ++col)
+			{
+				if (m_Grid[row][col].hasPowerPill)
+				{
+					auto worldPos = GetWorldCoordinatesMiddle(col, row);
+					auto powerPill = std::make_unique<PowerPellet>(
+						static_cast<float>(worldPos.x) - m_Width / 2,
+						static_cast<float>(worldPos.y) - m_Height / 2,
+						static_cast<float>(GetWidth()), static_cast<float>(GetWidth())
+					);
+					m_pPowerPills.push_back(std::move(powerPill));
+					m_Grid[row][col].pPowerPill = m_pPowerPills[m_pPowerPills.size() - 1].get(); // Store the pointer to the power pill in the cell
+				}
+			}
+		}
+
+    }
+
+    void GridComponent::NextLevel()
+    {
+		++m_Level;
+
+        switch (m_Level)
+        {
+        case 1:
+			LoadGridFromFile("Level1.txt");
+            GetOwner()->getComponent<dae::RenderComponent>()->SetSrcRect(utils::Rect{ 228, 0, 224, 248 });
+            break;
+		case 2:
+            LoadGridFromFile("Level2.txt");
+            GetOwner()->getComponent<dae::RenderComponent>()->SetSrcRect(utils::Rect{ 228, 248 * 1, 224, 248 });
+
+			break;
+        case 3:
+            LoadGridFromFile("Level3.txt");
+            GetOwner()->getComponent<dae::RenderComponent>()->SetSrcRect(utils::Rect{ 228, 248 * 2, 224, 248 });
+
+			break;
+        default:
+            std::cout << "No more levels available." << std::endl;
+			return; // No more levels to load
+        }
+
+        
     }
 
     void GridComponent::ImGuiRender()

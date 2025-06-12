@@ -2,6 +2,7 @@
 #include "TextObject.h"
 #include "RenderComponent.h"
 #include "Observer.h"
+#include "PacManCharacters.h"
 namespace dae
 {
     class LivesDisplayObserver :
@@ -26,6 +27,17 @@ namespace dae
         virtual ~ScoreDisplayObserver() = default;
     private:
         TextComponent* m_scoreTextComp;
+    };
+
+    class LevelUpObserver :
+        public Observer
+    {
+    public:
+        virtual void Notify(GameEvent event, GameObject* actor);
+        LevelUpObserver(GameObject* pacMan);
+        virtual ~LevelUpObserver() = default;
+    private:
+        PacManCharacter* m_pacMan;
     };
 }
 

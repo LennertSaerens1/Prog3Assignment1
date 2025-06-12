@@ -2,72 +2,54 @@
 #include "RenderComponent.h"
 #include "SoundSystem.h"
 #include "GridComponent.h"
+#include "Utils.h"
 
 namespace dae
 {
     class PacManCharacter; // Forward declaration
-    class DownState;
-	class LeftState;
-	class RightState;
-	class UpState;
+    class MovingState;
+    class IdleState;
 
     class PacManState
     {
     public:
 		PacManState(PacManCharacter& player) : m_pacManCharacter(&player) {}
 
-
         virtual ~PacManState() = default;
 
         virtual void Update(PacManCharacter& player, float deltaTime) = 0;
 
-
         virtual void OnEnter(PacManCharacter& player) =0;
 		virtual void OnExit(PacManCharacter& player) = 0;
 
-        static std::unique_ptr<DownState> m_downState;
-        static std::unique_ptr<UpState> m_upState;
-        static std::unique_ptr<LeftState> m_leftState;
-        static std::unique_ptr<RightState> m_rightState;
+        static std::unique_ptr<MovingState> m_movingState;
+		static std::unique_ptr<IdleState> m_idleState;
+
+        static std::unique_ptr<MovingState> m_mrMovingState;
+		static std::unique_ptr<IdleState> m_mrIdleState;
+
+
     protected:
 
 		PacManCharacter* m_pacManCharacter;
     };
 
-    class DownState : public PacManState
+    class MovingState : public PacManState
     {
     public:
-        explicit DownState(PacManCharacter& player) : PacManState(player) {}
+        explicit MovingState(PacManCharacter& player) : PacManState(player) {}
         void Update(PacManCharacter& player, float deltaTime) override;
         void OnEnter(PacManCharacter& player) override;
         void OnExit(PacManCharacter& player) override;
     };
 
-    class LeftState : public PacManState
+    class IdleState : public PacManState
     {
     public:
-        explicit LeftState(PacManCharacter& player) : PacManState(player) {}
-        void Update(PacManCharacter& player, float deltaTime) override;
-        void OnEnter(PacManCharacter& player) override;
-        void OnExit(PacManCharacter& player) override;
-    };
-
-    class RightState : public PacManState
-    {
-    public:
-        explicit RightState(PacManCharacter& player) : PacManState(player) {}
-        void Update(PacManCharacter& player, float deltaTime) override;
-        void OnEnter(PacManCharacter& player) override;
-        void OnExit(PacManCharacter& player) override;
-    };
-
-    class UpState : public PacManState
-    {
-    public:
-        explicit UpState(PacManCharacter& player) : PacManState(player) {}
-        void Update(PacManCharacter& player, float deltaTime) override;
-        void OnEnter(PacManCharacter& player) override;
-        void OnExit(PacManCharacter& player) override;
+        explicit IdleState(PacManCharacter& player) : PacManState(player) {}
+        void Update(PacManCharacter& , float ) override {};
+        void OnEnter(PacManCharacter& ) override {};
+        void OnExit(PacManCharacter& ) override {};
     };
 
 
@@ -75,7 +57,7 @@ namespace dae
         public RenderComponent
     {
 	public:
-		PacManCharacter(GameObject& gameObject, GridComponent* pGridComponent, bool isMale = true);
+		PacManCharacter(GameObject& gameObject, GridComponent* pGridComponent, bool isMale = false);
         ~PacManCharacter();
         void DecreaseLives();
 		void AddScore(int score);
@@ -87,7 +69,7 @@ namespace dae
 		{
 			auto world = GetOwner()->GetWorldPosition();
 			auto size = m_DestRect;
-			Vector2f vec { world.x + size.width / 2, world.y + size.height / 2 };
+			utils::Vector2f vec { world.x + size.width / 2, world.y + size.height / 2 };
 			return vec;
 		}
 
@@ -111,12 +93,29 @@ namespace dae
 		void MoveUp(float deltaTime);
 		void MoveDown(float deltaTime);
 
+		void PickUp(float deltaTime);
+
         void SetState(PacManState* newState);
+        void SetMovementDirection(glm::vec3 movementDir);
         virtual void Update(float deltaTime) override;
+
+        bool GetIsMale() { return m_isMale; };
+
+        void AddOtherPlayer(PacManCharacter* otherCharacter) ;
+
+		glm::vec3 GetMovementDirection() const
+		{
+			return m_movementDirection;
+		}
+
+		void LevelUp();
     private:
         int m_lives;
 		int m_score;
+        int m_isMale;
 		float m_movementSpeed;
+
+        glm::vec3 m_movementDirection;
 
         PacManState* m_pacManState;
 		float m_spriteTimer;
@@ -124,6 +123,8 @@ namespace dae
 		int m_spriteIndex;
 
 		GridComponent* m_pGridComponent;
+
+        PacManCharacter* m_otherPlayer;
     };
 }
 

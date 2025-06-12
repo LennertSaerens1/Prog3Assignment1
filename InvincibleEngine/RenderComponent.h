@@ -5,7 +5,6 @@
 #include "Transform.h"
 #include "Font.h"
 #include "Utils.h"
-using namespace utils;
 
 namespace dae
 {
@@ -22,8 +21,8 @@ namespace dae
 
 		void SetTexture(const std::string& filePath);
 
-		void SetSrcRect(const Rect& srcRect) { m_SrcRect = srcRect; };
-		void SetDestRect(const Rect& destRect) { m_DestRect = destRect; };
+		void SetSrcRect(const utils::Rect& srcRect) { m_SrcRect = srcRect; };
+		void SetDestRect(const utils::Rect& destRect) { m_DestRect = destRect; };
 
 		RenderComponent(GameObject& owner);
 		RenderComponent(const std::string& filePath, GameObject& owner);
@@ -35,8 +34,8 @@ namespace dae
 	protected:
 		bool m_needsUpdate;
 		std::shared_ptr<dae::Texture2D> m_Texture;
-		Rect m_SrcRect{};
-		Rect m_DestRect{};
+		utils::Rect m_SrcRect{};
+		utils::Rect m_DestRect{};
 	};
 }
 

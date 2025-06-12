@@ -37,19 +37,36 @@ namespace dae {
 			{
 			case dae::Up:
 				if (!pacMan->CanMoveUp()) return;
-				pacMan->SetState(PacManState::m_upState.get());
+				if (!pacMan->GetIsMale())
+					pacMan->SetState(PacManState::m_movingState.get());
+				else
+					pacMan->SetState(PacManState::m_mrMovingState.get());
+
+				pacMan->SetMovementDirection(glm::vec3(0, -1, 0));
 				break;
 			case dae::Down:
 				if (!pacMan->CanMoveDown()) return;
-				pacMan->SetState(PacManState::m_downState.get());				
+				if (!pacMan->GetIsMale())
+					pacMan->SetState(PacManState::m_movingState.get());
+				else
+					pacMan->SetState(PacManState::m_mrMovingState.get());
+				pacMan->SetMovementDirection(glm::vec3(0, 1, 0));
 				break;
 			case dae::Left:
 				if (!pacMan->CanMoveLeft()) return;
-				pacMan->SetState(PacManState::m_leftState.get());			
+				if (!pacMan->GetIsMale())
+					pacMan->SetState(PacManState::m_movingState.get());
+				else
+					pacMan->SetState(PacManState::m_mrMovingState.get());
+				pacMan->SetMovementDirection(glm::vec3(-1, 0, 0));
 				break;
 			case dae::Right:
 				if (!pacMan->CanMoveRight()) return;
-				pacMan->SetState(PacManState::m_rightState.get());				
+				if (!pacMan->GetIsMale())
+					pacMan->SetState(PacManState::m_movingState.get());
+				else
+					pacMan->SetState(PacManState::m_mrMovingState.get());
+				pacMan->SetMovementDirection(glm::vec3(1, 0, 0));
 				break;
 			default:
 				break;
@@ -86,6 +103,25 @@ namespace dae {
 		}
 	private:
 		int m_score;
+	};
+
+	class NextLevelCommand : public GameObjectCommand
+	{
+		public:
+		NextLevelCommand(GameObject* actor, GameObject* grid)
+			: GameObjectCommand(actor)
+		{
+			m_grid = grid;
+		}
+		void Execute(float) override
+		{
+			auto owner = GetGameObject()->getComponent<PacManCharacter>();
+			owner->LevelUp();
+			
+			m_grid->getComponent<GridComponent>()->NextLevel();
+		}
+	private:
+		GameObject* m_grid{ nullptr };
 	};
 }
 

@@ -156,14 +156,14 @@
     <ClCompile Include="GridComponent.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="PacManCharacters.cpp" />
-    <ClCompile Include="PelletComponent.cpp" />
+    <ClCompile Include="Pellet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Commands.h" />
     <ClInclude Include="Displays.h" />
     <ClInclude Include="GridComponent.h" />
     <ClInclude Include="PacManCharacters.h" />
-    <ClInclude Include="PelletComponent.h" />
+    <ClInclude Include="Pellet.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

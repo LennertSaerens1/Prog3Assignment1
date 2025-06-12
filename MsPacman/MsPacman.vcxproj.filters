@@ -30,7 +30,7 @@
     <ClCompile Include="PacManCharacters.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PelletComponent.cpp">
+    <ClCompile Include="Pellet.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -47,7 +47,7 @@
     <ClInclude Include="PacManCharacters.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PelletComponent.h">
+    <ClInclude Include="Pellet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

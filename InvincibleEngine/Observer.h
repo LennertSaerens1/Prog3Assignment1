@@ -9,7 +9,8 @@ namespace dae
 	{
 		PlayerDied,
 		PlayerScored,
-		playerWon
+		playerWon,
+		nextLevel,
 	}; //Change to be on game niveau, check slides again
 
 	class Observer
