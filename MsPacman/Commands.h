@@ -7,6 +7,7 @@
 #include "InputManager.h"
 #include "NameInputComponent.h"
 #include "ServiceLocator.h"
+#include "GhostComponent.h"
 #include <functional>
 
 namespace dae {
@@ -17,7 +18,7 @@ namespace dae {
 		Left,
 		Right
 	};
-	
+
 	class GameObjectCommand : public Command {
 		GameObject* m_actor;
 	protected:
@@ -34,7 +35,7 @@ namespace dae {
 			, m_direction{ dir }
 		{
 		}
-		void Execute(float ) override
+		void Execute(float) override
 		{
 			auto owner = GetGameObject();
 			auto pacMan = owner->getComponent<PacManCharacter>();
@@ -113,7 +114,7 @@ namespace dae {
 
 	class NextLevelCommand : public GameObjectCommand
 	{
-		public:
+	public:
 		NextLevelCommand(GameObject* actor, GameObject* grid)
 			: GameObjectCommand(actor)
 		{
@@ -123,7 +124,7 @@ namespace dae {
 		{
 			auto owner = GetGameObject()->getComponent<PacManCharacter>();
 			owner->LevelUp();
-			
+
 			m_grid->getComponent<GridComponent>()->NextLevel();
 		}
 	private:
@@ -212,6 +213,47 @@ namespace dae {
 				soundSystem->SetMuted(!soundSystem->IsMuted());
 			}
 		}
+	};
+
+	class MoveGhostCommand : public Command
+	{
+	public:
+		MoveGhostCommand(Direction dir, GameObject* ghost)
+			: m_ghost(ghost)
+			, m_direction(dir)
+		{
+		}
+		void Execute(float) override
+		{
+			auto ghostComponent = m_ghost->getComponent<GhostComponent>();
+			if (!ghostComponent) return;
+			switch (m_direction)
+			{
+			case dae::Up:
+				if (!ghostComponent->CanMoveUp()) return;
+				ghostComponent->SetMovementDirection(glm::vec3(0, -1, 0));
+				break;
+			case dae::Down:
+				if (!ghostComponent->CanMoveDown()) return;
+				ghostComponent->SetMovementDirection(glm::vec3(0, 1, 0));
+				break;
+			case dae::Left:
+				if (!ghostComponent->CanMoveLeft()) return;
+				ghostComponent->SetMovementDirection(glm::vec3(-1, 0, 0));
+				break;
+			case dae::Right:
+				if (!ghostComponent->CanMoveRight()) return;
+				ghostComponent->SetMovementDirection(glm::vec3(1, 0, 0));
+				break;
+			default:
+				break;
+			}
+		}
+	private:
+		GameObject* m_ghost{ nullptr };
+		Direction m_direction{ Direction::Up
+		};
+
 	};
 }
 

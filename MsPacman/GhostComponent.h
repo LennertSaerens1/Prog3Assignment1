@@ -10,7 +10,8 @@ namespace dae
         Blinky,
         Pinky,
         Inky,
-        Sue
+        Sue,
+        Player
     };
 
     class GhostComponent; // Forward declaration
@@ -201,6 +202,18 @@ namespace dae
         { 
             m_Speed = speed;
 		}
+
+        //FOR PLAYER ONLY
+        bool CanMoveUp() const;
+        bool CanMoveDown() const;
+        bool CanMoveLeft() const;
+        bool CanMoveRight() const;
+
+        void MoveLeft(float deltaTime);
+        void MoveRight(float deltaTime);
+        void MoveUp(float deltaTime);
+        void MoveDown(float deltaTime);
+        //FOR PLAYER ONLY
     private:
 		
 

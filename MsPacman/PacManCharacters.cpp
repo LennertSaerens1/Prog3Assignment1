@@ -574,7 +574,6 @@ namespace dae
 		SceneManager::GetInstance().QueueSceneLoad("GameOverScene", m_onDeath);
 	}
 
-	// DownState Implementation
 	void MovingState::Update(PacManCharacter& player, float deltaTime)
 	{
 		auto dir = player.GetMovementDirection();

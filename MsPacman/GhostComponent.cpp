@@ -40,6 +40,11 @@ namespace dae
         case dae::GhostType::Sue:
             ghost.UpdateSueSprite(deltaTime);
             break;
+		case dae::GhostType::Player:
+			ghost.UpdateBlinkySprite(deltaTime);
+			ghost.SetSpeed(100);
+            return;
+			break;
         default:
             break;
         }
@@ -344,6 +349,9 @@ namespace dae
         case dae::GhostType::Sue:
             ghost.UpdateSueSprite(deltaTime);
             break;
+		case dae::GhostType::Player:
+			ghost.UpdateBlinkySprite(deltaTime);
+            break;
         default:
             break;
         }
@@ -365,6 +373,9 @@ namespace dae
 				case dae::GhostType::Sue:
                     ghost.SetGhostState(GhostState::m_sueMovingState.get());
                     break;
+				case dae::GhostType::Player:
+                    ghost.SetGhostState(GhostState::m_movingState.get());
+					break;
             }
             return;
         }
@@ -405,7 +416,15 @@ namespace dae
             case dae::GhostType::Sue:
                 ghost.SetGhostState(GhostState::m_sueMovingState.get());
                 break;
+			case dae::GhostType::Player:
+				ghost.SetGhostState(GhostState::m_movingState.get());
             }
+            return;
+        }
+
+        if (ghost.GetGhostType() == dae::GhostType::Player)
+        {
+            ghost.SetSpeed(60);
             return;
         }
 
@@ -534,6 +553,8 @@ namespace dae
             case dae::GhostType::Sue:
                 ghost.SetGhostState(GhostState::m_sueMovingState.get());
                 break;
+			case dae::GhostType::Player:
+				ghost.SetGhostState(GhostState::m_movingState.get());
             }
             return;
         }
@@ -599,6 +620,15 @@ namespace dae
 
             SetGhostState(GhostState::m_sueIdleState.get());
             break;
+
+		case dae::GhostType::Player:
+            GhostState::m_movingState = std::make_unique<GhostMovingState>();
+            GhostState::m_idleState = std::make_unique<GhostIdleState>();
+            GhostState::m_fleeState = std::make_unique<GhostFleeState>();
+            GhostState::m_returnState = std::make_unique<GhostReturnState>();
+
+            SetGhostState(GhostState::m_idleState.get());
+            break;
         }
 
 
@@ -612,10 +642,34 @@ namespace dae
 
         m_ghostState->Update(*this, deltaTime);
 
-		auto movement = m_movementDir * m_Speed * deltaTime;
+		if (m_ghostType == GhostType::Player)
+        {
+            if (m_movementDir == glm::vec2{ 1,0 })
+            {
+                    MoveRight(deltaTime);
+            
+			}
+            else if (m_movementDir == glm::vec2{ -1,0 })
+            {
+                    MoveLeft(deltaTime);
+                
+            }
+            else if (m_movementDir == glm::vec2{ 0,-1 })
+            {
+                    MoveUp(deltaTime);
+                
+            }
+            else if (m_movementDir == glm::vec2{ 0,1 })
+            {
+                    MoveDown(deltaTime);
+            }
+		}
+        else
+        {
+            auto movement = m_movementDir * m_Speed * deltaTime;
 
-		GetOwner()->AddWorldOffset(glm::vec3{movement.x, movement.y, 0});
-
+            GetOwner()->AddWorldOffset(glm::vec3{ movement.x, movement.y, 0 });
+        }
 
 		CheckEnemyCollision();
 	}
@@ -644,11 +698,32 @@ namespace dae
                     
                 }
             }
-            else if (m_ghostState == GhostState::m_fleeState.get() || m_ghostState == GhostState::m_pinkyFleeState.get() || m_ghostState == GhostState::m_inkyFleeState.get() || m_ghostState == GhostState::m_sueFleeState.get())
+            else if (m_ghostState == GhostState::m_fleeState.get())
             {
                 if (distance < 25.0f) { // Adjust threshold as needed
                     player->EatGhost();
                     SetGhostState(GhostState::m_returnState.get());
+                }
+			}
+            else if (m_ghostState == GhostState::m_pinkyFleeState.get())
+            {
+                if (distance < 25.0f) { // Adjust threshold as needed
+                    player->EatGhost();
+                    SetGhostState(GhostState::m_pinkyReturnState.get());
+                }
+            }
+            else if (m_ghostState == GhostState::m_inkyFleeState.get())
+                            {
+                if (distance < 25.0f) { // Adjust threshold as needed
+                    player->EatGhost();
+                    SetGhostState(GhostState::m_inkyReturnState.get());
+                }
+            }
+            else if (m_ghostState == GhostState::m_sueFleeState.get())
+            {
+                if (distance < 25.0f) { // Adjust threshold as needed
+                    player->EatGhost();
+                    SetGhostState(GhostState::m_sueReturnState.get());
                 }
 			}
             
@@ -1030,6 +1105,137 @@ namespace dae
             break;
         default:
             break;
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    bool GhostComponent::CanMoveUp() const
+    {
+        if (GetMiddlePosition().x < m_pGridComponent->GetWidth() || GetMiddlePosition().x >(m_pGridComponent->GetWidth() - 1) * m_pGridComponent->GetCellSize())
+            return false;
+        int cellSize = m_pGridComponent->GetCellSize() - 1;
+        utils::Vector2f middlePos = GetMiddlePosition();
+        return m_pGridComponent->GetUpCellFromWorldPos(utils::Vector2f(middlePos.x, middlePos.y + cellSize / 2)).isWalkable;
+        //return m_pGridComponent->GetUpCellFromWorldPos(utils::Vector2f(middlePos.x - cellSize/2 +1, middlePos.y + cellSize / 2)).isWalkable && m_pGridComponent->GetUpCellFromWorldPos(utils::Vector2f(middlePos.x + cellSize / 2 -1, middlePos.y + cellSize / 2)).isWalkable;
+    }
+
+    bool GhostComponent::CanMoveDown() const
+    {
+        if (GetMiddlePosition().x < m_pGridComponent->GetWidth() || GetMiddlePosition().x >(m_pGridComponent->GetWidth() - 1) * m_pGridComponent->GetCellSize())
+            return false;
+
+        int cellSize = m_pGridComponent->GetCellSize() - 1;
+        utils::Vector2f middlePos = GetMiddlePosition();
+        return m_pGridComponent->GetDownCellFromWorldPos(utils::Vector2f(middlePos.x, middlePos.y - cellSize / 2)).isWalkable;
+        //return m_pGridComponent->GetDownCellFromWorldPos(utils::Vector2f(middlePos.x - cellSize/2 +1, middlePos.y - cellSize / 2)).isWalkable && m_pGridComponent->GetDownCellFromWorldPos(utils::Vector2f(middlePos.x + cellSize / 2 -1, middlePos.y - cellSize / 2)).isWalkable;
+    }
+
+    bool GhostComponent::CanMoveLeft() const
+    {
+        if (GetMiddlePosition().x < m_pGridComponent->GetWidth() || GetMiddlePosition().x >(m_pGridComponent->GetWidth() - 1) * m_pGridComponent->GetCellSize())
+            return false;
+
+        int cellSize = m_pGridComponent->GetCellSize() - 1;
+        utils::Vector2f middlePos = GetMiddlePosition();
+        return m_pGridComponent->GetLeftCellFromWorldPos(utils::Vector2f(middlePos.x + cellSize / 2, middlePos.y)).isWalkable;
+        //return m_pGridComponent->GetLeftCellFromWorldPos(utils::Vector2f(middlePos.x + cellSize / 2, middlePos.y - cellSize/2 +1)).isWalkable && m_pGridComponent->GetLeftCellFromWorldPos(utils::Vector2f(middlePos.x + cellSize / 2, middlePos.y + cellSize / 2-1)).isWalkable;
+    }
+
+    bool GhostComponent::CanMoveRight() const
+    {
+        if (GetMiddlePosition().x < m_pGridComponent->GetWidth() || GetMiddlePosition().x >(m_pGridComponent->GetWidth() - 1) * m_pGridComponent->GetCellSize())
+            return false;
+
+        int cellSize = m_pGridComponent->GetCellSize() - 1;
+        utils::Vector2f middlePos = GetMiddlePosition();
+        return m_pGridComponent->GetRightCellFromWorldPos(utils::Vector2f(middlePos.x - cellSize / 2, middlePos.y)).isWalkable;
+        //return m_pGridComponent->GetRightCellFromWorldPos(utils::Vector2f(middlePos.x - cellSize / 2, middlePos.y - cellSize/2 +1)).isWalkable && m_pGridComponent->GetRightCellFromWorldPos(utils::Vector2f(middlePos.x - cellSize / 2, middlePos.y + cellSize / 2 -1)).isWalkable;
+    }
+
+    void GhostComponent::MoveLeft(float deltaTime)
+    {
+        if (GetMiddlePosition().x < m_pGridComponent->GetWidth() || GetMiddlePosition().x >(m_pGridComponent->GetWidth() - 1) * m_pGridComponent->GetCellSize())
+        {
+            GetOwner()->AddWorldOffset(glm::vec3(-m_Speed * deltaTime, 0, 0));
+
+            if ((GetMiddlePosition().x + m_DestRect.width / 2) < 0)
+            {
+                SetMiddlePosition(GetMiddlePosition().x + m_pGridComponent->GetWidth() * m_pGridComponent->GetCellSize() + m_DestRect.width / 2, GetMiddlePosition().y);
+            }
+        }
+        else if (CanMoveLeft()) {
+
+            auto midPos = GetMiddlePosition();
+            float snapHeight = m_pGridComponent->GetSnapPos(midPos.x, midPos.y).y;
+
+            SetMiddlePosition(midPos.x, snapHeight);
+
+            GetOwner()->AddWorldOffset(glm::vec3(-m_Speed * deltaTime, 0, 0));
+        }
+
+    }
+
+    void GhostComponent::MoveRight(float deltaTime)
+    {
+        if (GetMiddlePosition().x < m_pGridComponent->GetWidth() || GetMiddlePosition().x >(m_pGridComponent->GetWidth() - 1) * m_pGridComponent->GetCellSize())
+        {
+            GetOwner()->AddWorldOffset(glm::vec3(m_Speed * deltaTime, 0, 0));
+
+            if ((GetMiddlePosition().x - m_DestRect.width / 2) > m_pGridComponent->GetWidth() * m_pGridComponent->GetCellSize())
+            {
+                SetMiddlePosition(1, GetMiddlePosition().y);
+            }
+        }
+        else if (CanMoveRight())
+        {
+            auto midPos = GetMiddlePosition();
+            float snapHeight = m_pGridComponent->GetSnapPos(midPos.x, midPos.y).y;
+
+            SetMiddlePosition(midPos.x, snapHeight);
+
+            GetOwner()->AddWorldOffset(glm::vec3(m_Speed * deltaTime, 0, 0));
+        }
+    }
+
+    void GhostComponent::MoveUp(float deltaTime)
+    {
+        if (CanMoveUp()) {
+            auto midPos = GetMiddlePosition();
+            float snapWidth = m_pGridComponent->GetSnapPos(midPos.x, midPos.y).x;
+
+            SetMiddlePosition(snapWidth, midPos.y);
+
+            GetOwner()->AddWorldOffset(glm::vec3(0, -m_Speed * deltaTime, 0));
+        }
+    }
+
+    void GhostComponent::MoveDown(float deltaTime)
+    {
+        if (CanMoveDown())
+        {
+            auto midPos = GetMiddlePosition();
+            float snapWidth = m_pGridComponent->GetSnapPos(midPos.x, midPos.y).x;
+
+            SetMiddlePosition(snapWidth, midPos.y);
+
+            GetOwner()->AddWorldOffset(glm::vec3(0, m_Speed * deltaTime, 0));
         }
     }
 }

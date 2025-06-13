@@ -180,6 +180,12 @@ namespace dae
                             ghost->SetGhostState(GhostState::m_sueFleeState.get());
                         }
 						break;
+                    case GhostType::Player:
+                         if (ghost->GetGhostState() == GhostState::m_movingState.get() || ghost->GetGhostState() == GhostState::m_fleeState.get())
+                         {
+                             ghost->SetGhostState(GhostState::m_fleeState.get());
+                         }
+                         break;
                 }
 			}
 
@@ -225,6 +231,12 @@ namespace dae
                     if (ghost->GetGhostState() == GhostState::m_sueMovingState.get() || ghost->GetGhostState() == GhostState::m_sueFleeState.get())
                     {
                         ghost->SetGhostState(GhostState::m_sueFleeState.get());
+                    }
+                    break;
+				case GhostType::Player:
+                    if (ghost->GetGhostState() == GhostState::m_movingState.get() || ghost->GetGhostState() == GhostState::m_fleeState.get())
+                    {
+                        ghost->SetGhostState(GhostState::m_fleeState.get());
                     }
                     break;
                 }
@@ -681,6 +693,12 @@ namespace dae
 				GhostState::m_sueMovingState->SetShouldReset(true);
                 middlePos = GetWorldCoordinatesMiddle(15, 14);
 				ghost->SetMiddlePosition(middlePos.x, middlePos.y); // Reset to Sue's starting position
+                break;
+            case GhostType::Player:
+                ghost->SetGhostState(GhostState::m_idleState.get());
+                GhostState::m_movingState->SetShouldReset(true);
+                middlePos = GetWorldCoordinatesMiddle(13, 11);
+                ghost->SetMiddlePosition(middlePos.x, middlePos.y); // Reset to Blinky's starting position
                 break;
             }
         }
