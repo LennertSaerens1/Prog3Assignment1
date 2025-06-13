@@ -3,6 +3,7 @@
 #include <string>
 #include <memory>
 #include "Singleton.h"
+#include <functional>
 
 namespace dae
 {
@@ -16,9 +17,22 @@ namespace dae
 		void FixedUpdate(const float fixedTime);
 		void Render();
 		void ImGuiRender();
+
+		void ClearScenes();
+		void SetActiveScene(const std::string& name);
+		Scene* GetActiveScene() const;
+		bool HasScene(const std::string& name) const;
+
+		void QueueSceneLoad(const std::string& sceneName, const std::function<void()>& loadFunction);
+
 	private:
 		friend class Singleton<SceneManager>;
 		SceneManager() = default;
 		std::vector<std::shared_ptr<Scene>> m_scenes;
+		std::string m_activeSceneName;
+
+		std::string m_QueuedSceneName;
+		std::function<void()> m_QueuedLoadFunction;
+		bool m_HasQueuedLoad = false;
 	};
 }

@@ -24,8 +24,26 @@ namespace dae
     std::unique_ptr<GhostFleeState> GhostState::m_sueFleeState = nullptr;
     std::unique_ptr<GhostReturnState> GhostState::m_sueReturnState = nullptr;
 
-    void GhostMovingState::Update(GhostComponent& ghost, float)
+    void GhostMovingState::Update(GhostComponent& ghost, float deltaTime)
     {
+        switch (ghost.GetGhostType())
+        {
+        case dae::GhostType::Blinky:
+            ghost.UpdateBlinkySprite(deltaTime);
+            break;
+        case dae::GhostType::Pinky:
+            ghost.UpdatePinkySprite(deltaTime);
+            break;
+        case dae::GhostType::Inky:
+            ghost.UpdateInkySprite(deltaTime);
+            break;
+        case dae::GhostType::Sue:
+            ghost.UpdateSueSprite(deltaTime);
+            break;
+        default:
+            break;
+        }
+
         // Get grid component and players
         auto* pGrid = ghost.GetGridComponent();
         if (!pGrid) return;
@@ -35,6 +53,8 @@ namespace dae
 
         // Get ghost's current position
         utils::Vector2f ghostPos = ghost.GetMiddlePosition();
+        int ghostCellX = pGrid->GetCellXFromWorld(ghostPos);
+        int ghostCellY = pGrid->GetCellYFromWorld(ghostPos);
 
         // Find nearest player
         PacManCharacter* nearestPlayer = nullptr;
@@ -55,27 +75,194 @@ namespace dae
 
         if (!nearestPlayer) return;
 
-        // Determine direction to move toward the nearest player
-        utils::Vector2f targetPos = nearestPlayer->GetMiddlePosition();
+        // Get player position and determine target based on ghost type
+        utils::Vector2f playerPos = nearestPlayer->GetMiddlePosition();
+        int playerCellX = pGrid->GetCellXFromWorld(playerPos);
+        int playerCellY = pGrid->GetCellYFromWorld(playerPos);
 
+        // Determine target position based on ghost type
+        int targetCellX = playerCellX;
+        int targetCellY = playerCellY;
 
-        // Get grid coordinates
-		int ghostCellX = pGrid->GetCellXFromWorld(ghostPos);
-		int ghostCellY = pGrid->GetCellYFromWorld(ghostPos);
-		int targetCellX = pGrid->GetCellXFromWorld(targetPos);
-		int targetCellY = pGrid->GetCellYFromWorld(targetPos);
+        // Get player's movement direction
+        glm::vec2 playerDir = nearestPlayer->GetMovementDirection();
 
+        // Grid dimensions for bounds checking
+        int width = pGrid->GetWidth();
+        int height = pGrid->GetHeight();
 
+        GhostComponent* blinky = nullptr;
+        float pinkyDistanceToPlayer{};
+
+        switch (ghost.GetGhostType())
+        {
+        case dae::GhostType::Blinky:
+            // Blinky directly targets Pac-Man's position
+            break;
+
+        case dae::GhostType::Pinky:
+            // Calculate tile distance to player to determine behavior
+            pinkyDistanceToPlayer = std::sqrtf(
+                std::powf(static_cast<float>(playerCellX) - ghostCellX, 2) +
+                std::powf(static_cast<float>(playerCellY) - ghostCellY, 2));
+
+            // If Pinky is very close to the player (within 3 tiles), chase directly
+            if (pinkyDistanceToPlayer < 5.0f) {
+                // Directly target player's position
+                targetCellX = playerCellX;
+                targetCellY = playerCellY;
+            }
+            else {
+                // Normal behavior: target 4 tiles ahead of Pac-Man
+                if (std::abs(playerDir.x) > std::abs(playerDir.y)) {
+                    // Moving horizontally
+                    targetCellX = playerCellX + (playerDir.x > 0 ? 4 : -4);
+                }
+                else {
+                    // Moving vertically
+                    targetCellY = playerCellY + (playerDir.y > 0 ? 4 : -4);
+                }
+            }
+            break;
+        case dae::GhostType::Inky:
+            // Inky uses a more complex targeting
+            // First, get the position 2 tiles ahead of Pac-Man
+            int inkyTargetX, inkyTargetY;
+            if (std::abs(playerDir.x) > std::abs(playerDir.y)) {
+                inkyTargetX = playerCellX + (playerDir.x > 0 ? 2 : -2);
+                inkyTargetY = playerCellY;
+            }
+            else {
+                inkyTargetX = playerCellX;
+                inkyTargetY = playerCellY + (playerDir.y > 0 ? 2 : -2);
+            }
+
+            // Clamp intermediate target to grid boundaries
+            inkyTargetX = std::max(0, std::min(inkyTargetX, width - 1));
+            inkyTargetY = std::max(0, std::min(inkyTargetY, height - 1));
+
+            // Now find Blinky's position
+            for (auto* ghostComponent : pGrid->GetGhosts()) {
+                if (ghostComponent && ghostComponent->GetGhostType() == dae::GhostType::Blinky) {
+                    blinky = ghostComponent;
+                    break;
+                }
+            }
+
+            if (blinky) {
+                utils::Vector2f blinkyPos = blinky->GetMiddlePosition();
+                int blinkyCellX = pGrid->GetCellXFromWorld(blinkyPos);
+                int blinkyCellY = pGrid->GetCellYFromWorld(blinkyPos);
+
+                // Target is twice the vector from Blinky to the point 2 tiles ahead of Pac-Man
+                targetCellX = inkyTargetX + (inkyTargetX - blinkyCellX);
+                targetCellY = inkyTargetY + (inkyTargetY - blinkyCellY);
+            }
+            break;
+
+        case dae::GhostType::Sue:
+            // Sue (Clyde) targets Pac-Man directly if far away, but retreats to a corner when close
+            // Calculate Euclidean distance (in tiles) to Pac-Man
+            float tileDistance = std::sqrtf(
+                std::powf(static_cast<float>(playerCellX) - ghostCellX, 2) +
+                std::powf(static_cast<float>(playerCellY) - ghostCellY, 2));
+
+            // Sue has random behavior sometimes
+            static float randomTimer = 0.0f;
+            randomTimer -= deltaTime;
+
+            if (randomTimer <= 0.0f) {
+                // Reset timer and maybe change target
+                randomTimer = 5.0f + static_cast<float>(rand() % 5); // 5-10 seconds
+
+                if (rand() % 2 == 0) { // 50% chance to pick a random spot
+                    targetCellX = rand() % width;
+                    targetCellY = rand() % height;
+                    break; // Skip the normal Sue logic
+                }
+            }
+
+            if (tileDistance < 8) {
+                // If close to Pac-Man, retreat to lower-left corner
+                targetCellX = 1;
+                targetCellY = pGrid->GetHeight() - 2;
+            }
+            break;
+        }
+
+        // Clamp target position to grid boundaries
+        targetCellX = std::max(0, std::min(targetCellX, width - 1));
+        targetCellY = std::max(0, std::min(targetCellY, height - 1));
+
+        // Check if the target position is walkable, if not find nearest walkable cell
+        if (!pGrid->IsWalkable(targetCellX, targetCellY)) {
+            // Find the nearest walkable cell to the target
+            FindNearestWalkableCell(targetCellX, targetCellY, pGrid, targetCellX, targetCellY);
+        }
 
         // Find the best direction to move using BFS
         glm::vec3 moveDir = FindNextMoveDirection(ghostCellX, ghostCellY, targetCellX, targetCellY, pGrid);
 
+        ghost.SetSpeed();
+
         // Move the ghost
-		ghost.SetMovementDirection(moveDir);
+        ghost.SetMovementDirection(moveDir);
+    }
+
+    // Helper method to find the nearest walkable cell to a target position
+    void GhostMovingState::FindNearestWalkableCell(int startX, int startY, GridComponent* pGrid,
+        int& outX, int& outY)
+    {
+        // Grid dimensions
+        int width = pGrid->GetWidth();
+        int height = pGrid->GetHeight();
+
+        // Simple BFS to find the nearest walkable cell
+        std::queue<std::pair<int, int>> queue;
+        std::vector<std::vector<bool>> visited(height, std::vector<bool>(width, false));
+
+        // Start at the given position
+        queue.push({ startX, startY });
+        visited[startY][startX] = true;
+
+        // Directions: up, right, down, left
+        const int dx[] = { 0, 1, 0, -1 };
+        const int dy[] = { -1, 0, 1, 0 };
+
+        while (!queue.empty()) {
+            auto [x, y] = queue.front();
+            queue.pop();
+
+            // If this cell is walkable, use it
+            if (pGrid->IsWalkable(x, y)) {
+                outX = x;
+                outY = y;
+                return;
+            }
+
+            // Try all four directions
+            for (int dir = 0; dir < 4; dir++) {
+                int nextX = x + dx[dir];
+                int nextY = y + dy[dir];
+
+                if (nextX >= 0 && nextX < width && nextY >= 0 && nextY < height &&
+                    !visited[nextY][nextX]) {
+                    queue.push({ nextX, nextY });
+                    visited[nextY][nextX] = true;
+                }
+            }
+        }
+
+        // If no walkable cell found, fallback to original position
+        outX = startX;
+        outY = startY;
     }
 
     void GhostMovingState::OnEnter(GhostComponent& ghost)
     { 
+        if (!m_shouldReset) return;
+		m_shouldReset = false;
+
 		auto inkyWorld = ghost.GetGridComponent()->GetWorldCoordinatesMiddle(13, 11);
 
         ghost.SetMiddlePosition(inkyWorld.x, inkyWorld.y);
@@ -143,6 +330,24 @@ namespace dae
 
     void GhostIdleState::Update(GhostComponent& ghost, float deltaTime)
     {
+        switch (ghost.GetGhostType())
+        {
+        case dae::GhostType::Blinky:
+            ghost.UpdateBlinkySprite(deltaTime);
+            break;
+        case dae::GhostType::Pinky:
+            ghost.UpdatePinkySprite(deltaTime);
+            break;
+        case dae::GhostType::Inky:
+            ghost.UpdateInkySprite(deltaTime);
+            break;
+        case dae::GhostType::Sue:
+            ghost.UpdateSueSprite(deltaTime);
+            break;
+        default:
+            break;
+        }
+
         m_startDelay -= deltaTime;
         if (m_startDelay <= 0.0f)
         {
@@ -167,6 +372,8 @@ namespace dae
 
     void GhostIdleState::OnEnter(GhostComponent& ghost)
     {
+		ghost.SetMovementDirection(glm::vec3(0, 0, 0)); // Stop movement
+
         m_startDelay = ghost.GetOriginalStartDelay();
     }
 
@@ -175,21 +382,168 @@ namespace dae
 
     }
 
-    void GhostFleeState::Update(GhostComponent& , float )
+    void GhostFleeState::Update(GhostComponent& ghost, float deltaTime)
     {
+		ghost.UpdateFleeSprite(deltaTime);
 
-	}
+        // Update flee timer
+        m_fleeTimer -= deltaTime;
+        if (m_fleeTimer <= 0.0f)
+        {
+            // Return to appropriate moving state based on ghost type
+            switch (ghost.GetGhostType())
+            {
+            case dae::GhostType::Blinky:
+                ghost.SetGhostState(GhostState::m_movingState.get());
+                break;
+            case dae::GhostType::Pinky:
+                ghost.SetGhostState(GhostState::m_pinkyMovingState.get());
+                break;
+            case dae::GhostType::Inky:
+                ghost.SetGhostState(GhostState::m_inkyMovingState.get());
+                break;
+            case dae::GhostType::Sue:
+                ghost.SetGhostState(GhostState::m_sueMovingState.get());
+                break;
+            }
+            return;
+        }
+
+        // Get grid component and players
+        auto* pGrid = ghost.GetGridComponent();
+        if (!pGrid) return;
+
+        const auto& players = ghost.GetEnemies();
+        if (players.empty()) return;
+
+        // Get ghost's current position
+        utils::Vector2f ghostPos = ghost.GetMiddlePosition();
+        int ghostCellX = pGrid->GetCellXFromWorld(ghostPos);
+        int ghostCellY = pGrid->GetCellYFromWorld(ghostPos);
+
+        // Find all player positions
+        std::vector<std::pair<int, int>> playerPositions;
+        for (auto* player : players) {
+            if (!player) continue;
+            utils::Vector2f playerPos = player->GetMiddlePosition();
+            int playerCellX = pGrid->GetCellXFromWorld(playerPos);
+            int playerCellY = pGrid->GetCellYFromWorld(playerPos);
+            playerPositions.emplace_back(playerCellX, playerCellY);
+        }
+
+        // Directions: up, right, down, left
+        const int dx[] = { 0, 1, 0, -1 };
+        const int dy[] = { -1, 0, 1, 0 };
+
+        // Find the direction that maximizes distance from all players
+        float maxDistanceSum = -1.0f;
+        int bestDir = -1;
+
+        // Grid dimensions
+        int width = pGrid->GetWidth();
+        int height = pGrid->GetHeight();
+
+        // Evaluate each possible move direction
+        for (int dir = 0; dir < 4; dir++) {
+            int nextX = ghostCellX + dx[dir];
+            int nextY = ghostCellY + dy[dir];
+
+            // Skip if not walkable or out of bounds
+            if (nextX < 0 || nextX >= width || nextY < 0 || nextY >= height ||
+                !pGrid->IsWalkable(nextX, nextY)) {
+                continue;
+            }
+
+            // Calculate sum of squared distances to all players (higher is better for fleeing)
+            float distanceSum = 0.0f;
+            for (const auto& playerPos : playerPositions) {
+                int playerX = playerPos.first;
+                int playerY = playerPos.second;
+
+                // Manhattan distance (since ghosts move in grid)
+                float distance = static_cast<float>(std::abs(playerX - nextX) + std::abs(playerY - nextY));
+                distanceSum += distance;
+            }
+
+            if (distanceSum > maxDistanceSum) {
+                maxDistanceSum = distanceSum;
+                bestDir = dir;
+            }
+        }
+
+        // If no valid direction found, stay put
+        if (bestDir == -1) {
+            ghost.SetMovementDirection(glm::vec3(0, 0, 0));
+            return;
+        }
+
+        // Move in the best direction
+        glm::vec3 moveDir(0, 0, 0);
+        switch (bestDir) {
+        case 0: moveDir = glm::vec3(0, -1, 0); break; // Up
+        case 1: moveDir = glm::vec3(1, 0, 0); break;  // Right
+        case 2: moveDir = glm::vec3(0, 1, 0); break;  // Down
+        case 3: moveDir = glm::vec3(-1, 0, 0); break; // Left
+        }
+
+		ghost.SetSpeed(60); // Set flee speed
+
+        ghost.SetMovementDirection(moveDir);
+    }
 
     void GhostFleeState::OnEnter(GhostComponent& )
     {
+        m_fleeTimer = 6.0f;
     }
     void GhostFleeState::OnExit(GhostComponent& )
     {
     }
 
-    void GhostReturnState::Update(GhostComponent& , float )
+    void GhostReturnState::Update(GhostComponent& ghost, float elapsedSec)
     {
+        ghost.SetSpeed(200);
 
+        ghost.UpdateReturnSprite(elapsedSec);
+
+        // Get grid component
+        auto* pGrid = ghost.GetGridComponent();
+        if (!pGrid) return;
+
+        // Get ghost's current position
+        utils::Vector2f ghostPos = ghost.GetMiddlePosition();
+        int ghostCellX = pGrid->GetCellXFromWorld(ghostPos);
+        int ghostCellY = pGrid->GetCellYFromWorld(ghostPos);
+
+        // Target position is cell (13, 11) - the ghost home
+        int targetCellX = 13;
+        int targetCellY = 11;
+
+        // Check if ghost has reached the target position
+        if (ghostCellX == targetCellX && ghostCellY == targetCellY) {
+            // Transition back to appropriate moving state based on ghost type
+            switch (ghost.GetGhostType()) {
+            case dae::GhostType::Blinky:
+                ghost.SetGhostState(GhostState::m_movingState.get());
+                break;
+            case dae::GhostType::Pinky:
+                ghost.SetGhostState(GhostState::m_pinkyMovingState.get());
+                break;
+            case dae::GhostType::Inky:
+                ghost.SetGhostState(GhostState::m_inkyMovingState.get());
+                break;
+            case dae::GhostType::Sue:
+                ghost.SetGhostState(GhostState::m_sueMovingState.get());
+                break;
+            }
+            return;
+        }
+
+        // Find the best direction to move toward the target using BFS
+        glm::vec3 moveDir = GhostMovingState::FindNextMoveDirection(
+            ghostCellX, ghostCellY, targetCellX, targetCellY, pGrid);
+
+        // Move the ghost
+        ghost.SetMovementDirection(moveDir);
     }
     void GhostReturnState::OnEnter(GhostComponent& )
     {
@@ -262,24 +616,50 @@ namespace dae
 
 		GetOwner()->AddWorldOffset(glm::vec3{movement.x, movement.y, 0});
 
-        switch (m_ghostType)
-        {
-        case dae::GhostType::Blinky:
-            UpdateBlinkySprite(deltaTime);
-            break;
-        case dae::GhostType::Pinky:
-            UpdatePinkySprite(deltaTime);
-            break;
-        case dae::GhostType::Inky:
-            UpdateInkySprite(deltaTime);
-            break;
-        case dae::GhostType::Sue:
-            UpdateSueSprite(deltaTime);
-            break;
-        default:
-            break;
-        }
+
+		CheckEnemyCollision();
 	}
+
+    void GhostComponent::CheckEnemyCollision()
+    {
+        auto* pGrid = GetGridComponent();
+        if (!pGrid) return;
+        const auto& players = GetEnemies();
+        if (players.empty()) return;
+        // Get ghost's current position
+        utils::Vector2f ghostPos = GetMiddlePosition();
+        // Check collision with each player
+        for (auto* player : players) {
+            if (!player) continue;
+            // Calculate distance to this player
+            utils::Vector2f playerPos = player->GetMiddlePosition();
+            float distance = std::sqrtf(std::powf(playerPos.x - ghostPos.x, 2) + std::powf(playerPos.y - ghostPos.y, 2));
+            // If distance is less than a threshold, handle collision
+            if (m_ghostState == GhostState::m_inkyMovingState.get() || m_ghostState == GhostState::m_pinkyMovingState.get() || m_ghostState == GhostState::m_movingState.get() || m_ghostState == GhostState::m_sueMovingState.get())
+            {
+                if (distance < 25.0f) { // Adjust threshold as needed
+                    player->OnCollision(GetOwner());
+
+                        ResetGhosts();
+                    
+                }
+            }
+            else if (m_ghostState == GhostState::m_fleeState.get() || m_ghostState == GhostState::m_pinkyFleeState.get() || m_ghostState == GhostState::m_inkyFleeState.get() || m_ghostState == GhostState::m_sueFleeState.get())
+            {
+                if (distance < 25.0f) { // Adjust threshold as needed
+                    player->EatGhost();
+                    SetGhostState(GhostState::m_returnState.get());
+                }
+			}
+            
+		}
+    }
+
+    void GhostComponent::ResetGhosts()
+    {
+		m_pGridComponent->ResetGhosts();
+    }
+
     void GhostComponent::UpdateInkySprite(float deltaTime)
     {
         m_spriteTimer += deltaTime;
@@ -606,6 +986,50 @@ namespace dae
             default:
                 break;
             }
+        }
+    }
+    void GhostComponent::UpdateFleeSprite(float deltaTime)
+    {
+        m_spriteTimer += deltaTime;
+        if (m_spriteTimer > m_spriteInterval)
+        {
+            ++m_spriteIndex;
+            m_spriteTimer = 0;
+            if (m_spriteIndex >= 2)
+                m_spriteIndex = 0;
+        }
+         switch (m_spriteIndex)
+         {
+         case 0:
+             SetSrcRect(utils::Rect{ 585, 65, 14, 14 });
+             break;
+         case 1:
+             SetSrcRect(utils::Rect{ 633, 65, 14, 14 });
+             break;
+         default:
+             break;
+         }
+    }
+    void GhostComponent::UpdateReturnSprite(float deltaTime)
+    {
+        m_spriteTimer += deltaTime;
+        if (m_spriteTimer > m_spriteInterval)
+        {
+            ++m_spriteIndex;
+            m_spriteTimer = 0;
+            if (m_spriteIndex >= 2)
+                m_spriteIndex = 0;
+        }
+        switch (m_spriteIndex)
+        {
+        case 0:
+            SetSrcRect(utils::Rect{ 585, 81, 14, 14 });
+            break;
+        case 1:
+            SetSrcRect(utils::Rect{ 633, 81, 14, 14 });
+            break;
+        default:
+            break;
         }
     }
 }

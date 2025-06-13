@@ -6,6 +6,24 @@
 #include "Xinput.h"
 
 
+void dae::InputManager::ClearCommands()
+{
+    // Clear keyboard command maps
+	m_keyboardCommandMap.clear();
+    m_keyboardUpCommandMap.clear();
+    m_keyboardDownCommandMap.clear();
+
+    // Clear controller command maps
+    m_controllerCommandMap.clear();
+    m_controllerUpCommandMap.clear();
+    m_controllerDownCommandMap.clear();
+
+    // Clear controller 2 command maps
+    m_controller2CommandMap.clear();
+    m_controller2DownCommandMap.clear();
+    m_controller2UpCommandMap.clear();
+}
+
 bool dae::InputManager::ProcessInput(float elapsedSec)
 {
     SDL_Event e;
@@ -19,6 +37,7 @@ bool dae::InputManager::ProcessInput(float elapsedSec)
     m_Keyboard.ProcessInput();
 	//Update Controller Input
     m_Controller.ProcessInput();
+	m_Controller2.ProcessInput();
 
     ProcessMappedInput<SDL_Scancode>(m_keyboardCommandMap,
         [this](SDL_Scancode key) { return m_Keyboard.IsPressed(key); }, elapsedSec);//Handle isPressed for eacht input on keyboard
@@ -38,6 +57,15 @@ bool dae::InputManager::ProcessInput(float elapsedSec)
 
     ProcessMappedInput<int>(m_controllerUpCommandMap,
 		[this](int button) { return m_Controller.IsUpThisFrame(button); }, elapsedSec);//Handle IsUpThisFrame for each input on controller
+
+    ProcessMappedInput<int>(m_controller2CommandMap,
+		[this](int button) { return m_Controller2.IsPressed(button); }, elapsedSec);//Handle isPressed for eacht input on controller 2
+    ProcessMappedInput<int>(m_controller2DownCommandMap,
+        [this](int button) { return m_Controller2.IsDownThisFrame(button); }, elapsedSec);
+
+    ProcessMappedInput<int>(m_controller2UpCommandMap,
+        [this](int button) { return m_Controller2.IsUpThisFrame(button); }, elapsedSec);
+
 
     return true;
 }
@@ -69,6 +97,22 @@ void dae::InputManager::BindControllerDownCommand(int button, std::shared_ptr<Co
 {
     m_controllerDownCommandMap[button].push_back(command);
 }
+
+void dae::InputManager::BindController2Command(int button, std::shared_ptr<Command> command)
+{
+    m_controller2CommandMap[button].push_back(command);
+}
+void dae::InputManager::BindController2DownCommand(int button, std::shared_ptr<Command> command)
+{
+    m_controller2DownCommandMap[button].push_back(command);
+}
+
+void dae::InputManager::BindController2UpCommand(int button, std::shared_ptr<Command> command)
+{
+    m_controller2UpCommandMap[button].push_back(command);
+}
+
+
 
 //void dae::InputManager::HandleKeyboardInput(int key, float elapsedSec) {
 //    // Check if the key exists in the keyboard command map
@@ -158,3 +202,35 @@ void dae::InputManager::UnbindControllerDownCommand(int input, std::shared_ptr<C
     }
 }
 
+void dae::InputManager::UnbindController2Command(int input, std::shared_ptr<Command> command)
+{
+    if (m_controller2CommandMap.find(input) != m_controller2CommandMap.end()) {
+        auto& commands = m_controller2CommandMap[input];
+        commands.erase(std::remove(commands.begin(), commands.end(), command), commands.end());
+        if (commands.empty()) {
+            m_controller2CommandMap.erase(input);  // Clean up empty entries
+        }
+    }
+}
+
+void dae::InputManager::UnbindController2DownCommand(int input, std::shared_ptr<Command> command)
+{
+    if (m_controller2DownCommandMap.find(input) != m_controller2DownCommandMap.end()) {
+        auto& commands = m_controller2DownCommandMap[input];
+        commands.erase(std::remove(commands.begin(), commands.end(), command), commands.end());
+        if (commands.empty()) {
+            m_controller2DownCommandMap.erase(input);
+        }
+    }
+}
+
+void dae::InputManager::UnbindController2UpCommand(int input, std::shared_ptr<Command> command)
+{
+    if (m_controller2UpCommandMap.find(input) != m_controller2UpCommandMap.end()) {
+        auto& commands = m_controller2UpCommandMap[input];
+        commands.erase(std::remove(commands.begin(), commands.end(), command), commands.end());
+        if (commands.empty()) {
+            m_controller2UpCommandMap.erase(input);
+        }
+    }
+}

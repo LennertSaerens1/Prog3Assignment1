@@ -1,4 +1,6 @@
 #pragma once
+#include <vector>
+
 
 namespace utils
 {
@@ -19,6 +21,17 @@ namespace utils
         float Bottom() const { return position.y + height; }
     };
 
+    struct HighScoreEntry {
+        int score;
+        char name[3];
+
+        HighScoreEntry(int s = 0, const char* n = "AAA") : score(s) {
+            name[0] = n[0];
+            name[1] = n[1];
+            name[2] = n[2];
+        }
+    };
+
     inline bool IsOverlapping(const Rect& rect1, const Rect& rect2)
     {
         // Check if one rectangle is to the left or above the other
@@ -28,6 +41,8 @@ namespace utils
             rect2.Bottom() <= rect1.position.y);  // rect2 is above rect1
     }
 
-    void SaveHighScore(int highScore);
     int LoadHighScore();
+    std::vector<HighScoreEntry> LoadAllHighScoreEntries();
+    void SaveHighScoresWithNames(const std::vector<HighScoreEntry>& highScores);
+    void SaveHighScore(int highScore, const char name[3] = "AAA");
 }

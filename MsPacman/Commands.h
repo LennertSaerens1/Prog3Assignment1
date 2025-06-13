@@ -2,6 +2,12 @@
 #include "GameObject.h"
 #include "PacManCharacters.h"
 #include "Command.h"
+#include "SceneManager.h"
+#include "Scene.h"
+#include "InputManager.h"
+#include "NameInputComponent.h"
+#include "ServiceLocator.h"
+#include <functional>
 
 namespace dae {
 	enum Direction
@@ -122,6 +128,90 @@ namespace dae {
 		}
 	private:
 		GameObject* m_grid{ nullptr };
+	};
+
+	class LoadSceneCommand : public Command
+	{
+	public:
+		LoadSceneCommand(const std::string& sceneName, const std::function<void()>& loadFunction)
+			: m_SceneName(sceneName), m_LoadFunction(loadFunction) {
+		}
+
+		void Execute(float) override
+		{
+			// Clear scene properly to avoid dangling references
+			auto& sceneManager = SceneManager::GetInstance();
+			// Allow current scene to clean up properly
+			//InputManager::GetInstance().ClearCommands();
+			if (auto activeScene = sceneManager.GetActiveScene()) {
+				activeScene->RemoveAll();
+			}
+			sceneManager.ClearScenes();
+
+			// Store the function to be called later instead of calling it directly
+			SceneManager::GetInstance().QueueSceneLoad(m_SceneName, m_LoadFunction);
+		}
+
+	private:
+		std::string m_SceneName;
+		std::function<void()> m_LoadFunction;
+	};
+
+	enum class NameInputType
+	{
+		Left,
+		Right,
+		LetterUp,
+		LetterDown,
+	};
+
+	class NameInputCommand : public Command
+	{
+	public:
+		NameInputCommand(NameInputComponent* comp, NameInputType type)
+			: m_comp(comp)
+			, m_type(type)
+		{
+		}
+		void Execute(float) override
+		{
+			switch (m_type)
+			{
+			case dae::NameInputType::Left:
+				m_comp->goLeft();
+				break;
+			case dae::NameInputType::Right:
+				m_comp->goRight();
+				break;
+			case dae::NameInputType::LetterUp:
+				m_comp->numberUp();
+				break;
+			case dae::NameInputType::LetterDown:
+				m_comp->numberDown();
+				break;
+			default:
+				break;
+			}
+		}
+	private:
+		NameInputComponent* m_comp{ nullptr };
+		NameInputType m_type;
+	};
+
+	class MuteCommand : public Command
+	{
+	public:
+		MuteCommand()
+		{
+		}
+
+		void Execute(float) override
+		{
+			auto& base = dae::ServiceLocator::GetSoundSystem();
+			if (auto* soundSystem = dynamic_cast<dae::SoundSystem*>(&base)) {
+				soundSystem->SetMuted(!soundSystem->IsMuted());
+			}
+		}
 	};
 }
 

@@ -3,6 +3,8 @@
 #include "SoundSystem.h"
 #include "Utils.h"
 
+int g_globalScore = 0;
+
 namespace dae
 {
 	// Initialize static state members
@@ -12,8 +14,9 @@ namespace dae
 	std::unique_ptr<IdleState> PacManState::m_mrIdleState = nullptr;
 
 
-	dae::PacManCharacter::PacManCharacter(GameObject& gameObject, GridComponent* pGridComponent, bool isMale)
+	dae::PacManCharacter::PacManCharacter(GameObject& gameObject, GridComponent* pGridComponent, std::function<void()> onDeath, bool isMale)
 		: RenderComponent("SpriteSheet.png", gameObject)
+		, m_onDeath(onDeath)
 	{
 		m_isMale = isMale;
 		m_lives = 3;
@@ -42,6 +45,10 @@ namespace dae
 			PacManState::m_idleState = std::make_unique<IdleState>(*this);
 
 			SetState(PacManState::m_idleState.get());
+
+			auto& soundSystem = dae::ServiceLocator::GetSoundSystem();
+			auto id = soundSystem.LoadSound("Sounds/ms_start.wav");
+			soundSystem.Play(id, 1.0f);
 		}
 		else
 		{
@@ -51,15 +58,12 @@ namespace dae
 			SetState(PacManState::m_mrIdleState.get());
 		}
 
-		auto& soundSystem = dae::ServiceLocator::GetSoundSystem();
-		auto id = soundSystem.LoadSound("Sounds/ms_start.wav");
-		soundSystem.Play(id, 1.0f);
-
+		
 	}
 
 	dae::PacManCharacter::~PacManCharacter()
 	{
-		utils::SaveHighScore(m_score);
+		
 	}
 
 	void dae::PacManCharacter::DecreaseLives()
@@ -67,7 +71,27 @@ namespace dae
 		m_lives--;
 		auto& soundSystem = dae::ServiceLocator::GetSoundSystem();
 		auto id = soundSystem.LoadSound("Sounds/ms_death.wav");
+		soundSystem.StopAllSounds();
 		soundSystem.Play(id, 1.0f);
+
+		if (!m_isMale)
+		{
+			auto pacManWorld = m_pGridComponent->GetWorldCoordinatesMiddle(13, 23);
+
+			SetMiddlePosition(pacManWorld.x, pacManWorld.y);
+		}
+		else
+		{
+			auto pacManWorld = m_pGridComponent->GetWorldCoordinatesMiddle(14, 23);
+
+			SetMiddlePosition(pacManWorld.x, pacManWorld.y);
+		}
+
+		if (!m_isMale)
+			SetState(PacManState::m_idleState.get());
+		else
+			SetState(PacManState::m_mrIdleState.get());
+
 		GetOwner()->NotifyObservers(GameEvent::PlayerDied);
 
 	}
@@ -462,11 +486,42 @@ namespace dae
 		{
 			m_pacManState->Update(*this, deltaTime);
 		}
+
+		if (m_eatGhostTimer > 0.0f)
+		{
+			m_eatGhostTimer -= deltaTime;
+		}
+		else
+		{
+			m_ghostMultiplier = 0;
+		}
+
+		if (m_lives == -1)
+		{
+			if (m_onDeath == nullptr) return;
+
+			if (m_score > 0)
+			{
+				g_globalScore = m_score;
+			}
+
+			SceneManager::GetInstance().QueueSceneLoad("GameOverScene", m_onDeath);
+		}
 	}
 
 	void PacManCharacter::AddOtherPlayer(PacManCharacter* otherCharacter)
 	{
 		m_otherPlayer = otherCharacter;
+	}
+
+	void PacManCharacter::OnCollision(GameObject* )
+	{
+		DecreaseLives();
+
+		if (m_otherPlayer != nullptr)
+		{
+			m_otherPlayer->DecreaseLives();
+		}
 	}
 
 	void PacManCharacter::LevelUp()
@@ -489,8 +544,34 @@ namespace dae
 		else
 			SetState(PacManState::m_mrIdleState.get());
 
-		if (m_otherPlayer != nullptr)
-			m_otherPlayer->LevelUp();
+		if (!m_isMale)
+		{
+			if (m_otherPlayer != nullptr)
+				m_otherPlayer->LevelUp();
+		}
+	}
+
+	void PacManCharacter::EatGhost()
+	{
+		auto score = 200 * static_cast<int>(powf(2.f, m_ghostMultiplier * 1.f));
+		AddScore(score);
+		++m_ghostMultiplier;
+		auto& soundSystem = dae::ServiceLocator::GetSoundSystem();
+		auto id = soundSystem.LoadSound("Sounds/ms_eat_ghost.wav");
+		soundSystem.Play(id, 1.0f);
+		
+	}
+
+	void PacManCharacter::SetEndScreen()
+	{
+		if (m_onDeath == nullptr) return;
+
+		if (m_score > 0)
+		{
+			g_globalScore = m_score;
+		}
+
+		SceneManager::GetInstance().QueueSceneLoad("GameOverScene", m_onDeath);
 	}
 
 	// DownState Implementation

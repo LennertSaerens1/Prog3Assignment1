@@ -12,6 +12,8 @@ namespace dae
 	class InputManager final : public Singleton<InputManager>
 	{
 	public:
+		void ClearCommands();
+
 		bool ProcessInput(float deltaTime);
 
 		// Bind keys/buttons to commands
@@ -21,6 +23,10 @@ namespace dae
 		void BindControllerUpCommand(int button, std::shared_ptr<Command> command);
 		void BindKeyboardDownCommand(SDL_Scancode key, std::shared_ptr<Command> command);
 		void BindControllerDownCommand(int button, std::shared_ptr<Command> command);
+
+		void BindController2Command(int button, std::shared_ptr<Command> command);
+		void BindController2DownCommand(int button, std::shared_ptr<Command> command);
+		void BindController2UpCommand(int button, std::shared_ptr<Command> command);
 
 	/*	void HandleKeyboardInput(int key, float elapsedSec);
 		void HandleControllerInput(int button, float elapsedSec);*/
@@ -32,6 +38,10 @@ namespace dae
 		void UnbindControllerUpCommand(int input, std::shared_ptr<Command> command);
 		void UnbindKeyboardDownCommand(SDL_Scancode input, std::shared_ptr<Command> command);
 		void UnbindControllerDownCommand(int input, std::shared_ptr<Command> command);
+
+		void UnbindController2Command(int input, std::shared_ptr<Command> command);
+		void UnbindController2DownCommand(int input, std::shared_ptr<Command> command);
+		void UnbindController2UpCommand(int input, std::shared_ptr<Command> command);
 
 		template<typename KeyType>
 		void ProcessMappedInput(
@@ -49,6 +59,7 @@ namespace dae
 		}
 	private:
 		Controller m_Controller = Controller(0);
+		Controller m_Controller2 = Controller(1);
 		KeyBoardInput m_Keyboard = KeyBoardInput();
 
 		// Map of inputs to commands
@@ -58,6 +69,10 @@ namespace dae
 		std::unordered_map<int, std::vector<std::shared_ptr<Command>>> m_controllerUpCommandMap;
 		std::unordered_map<SDL_Scancode, std::vector<std::shared_ptr<Command>>> m_keyboardDownCommandMap;
 		std::unordered_map<int, std::vector<std::shared_ptr<Command>>> m_controllerDownCommandMap;
+
+		std::unordered_map<int, std::vector<std::shared_ptr<Command>>> m_controller2CommandMap;
+		std::unordered_map<int, std::vector<std::shared_ptr<Command>>> m_controller2DownCommandMap;
+		std::unordered_map<int, std::vector<std::shared_ptr<Command>>> m_controller2UpCommandMap;
 	};
 
 }

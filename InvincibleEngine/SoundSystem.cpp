@@ -148,7 +148,7 @@ namespace dae
 
 
     SoundSystem::SoundSystem()
-        : m_SoundImpl(std::make_unique<SoundImpl>())
+        : m_SoundImpl(std::make_unique<SoundImpl>()), m_isMuted(false)
     {
     }
 
@@ -178,6 +178,10 @@ namespace dae
 
     void SoundSystem::Play(const SoundId id, float volume, bool loop)
     {
+        // --- Mute logic ---
+        if (m_isMuted)
+            volume = 0.0f;
+        // -----------------
         m_SoundImpl->Play(id, volume, loop);
     }
 
@@ -194,5 +198,15 @@ namespace dae
     void SoundSystem::Shutdown()
     {
         m_SoundImpl->Shutdown();
+    }
+
+    void SoundSystem::SetMuted(bool muted)
+    {
+        m_isMuted = muted;
+    }
+
+    bool SoundSystem::IsMuted() const
+    {
+        return m_isMuted;
     }
 }

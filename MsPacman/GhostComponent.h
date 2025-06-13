@@ -1,6 +1,7 @@
 #pragma once
 #include "RenderComponent.h"
 #include "GridComponent.h"
+#include "PacManCharacters.h"
 
 namespace dae
 { 
@@ -48,9 +49,6 @@ namespace dae
         static std::unique_ptr<GhostIdleState> m_sueIdleState;
 		static std::unique_ptr<GhostFleeState> m_sueFleeState;
         static std::unique_ptr<GhostReturnState> m_sueReturnState;
-
-
-
     protected:
     };
 
@@ -62,13 +60,23 @@ namespace dae
         void OnEnter(GhostComponent& ghost) override;
         void OnExit(GhostComponent& ghost) override;
 
-        glm::vec3 FindNextMoveDirection(int startX, int startY, int targetX, int targetY, GridComponent* pGrid);
+        static glm::vec3 FindNextMoveDirection(int startX, int startY, int targetX, int targetY, GridComponent* pGrid);
+
+        void FindNearestWalkableCell(int startX, int startY, GridComponent* pGrid, int& outX, int& outY);
+
+        void SetShouldReset(bool shouldReset)
+        {
+            m_shouldReset = shouldReset;
+        }
+
+    protected:
+        bool m_shouldReset = true;
     };
 
     class GhostIdleState : public GhostState
     {
     public:
-        explicit GhostIdleState() {}
+        explicit GhostIdleState() = default;
         void Update(GhostComponent& ghost, float dt) override;
         void OnEnter(GhostComponent& ghost) override ;
         void OnExit(GhostComponent&) override ;
@@ -76,7 +84,7 @@ namespace dae
         float m_startDelay;
     };
 
-    class GhostFleeState : GhostState
+    class GhostFleeState : public GhostState
     {
     public:
         explicit GhostFleeState() = default;
@@ -84,11 +92,15 @@ namespace dae
         void OnEnter(GhostComponent& ghost) override;
 		void OnExit(GhostComponent& ghost) override;
 
+        void SetTimer(float timer)
+        {
+            m_fleeTimer = timer;
+		}
     private:
-
+		float m_fleeTimer = 0.0f;
     };
 
-    class GhostReturnState : GhostState
+    class GhostReturnState : public GhostState
     {
     public:
         explicit GhostReturnState() = default;
@@ -136,6 +148,11 @@ namespace dae
             }
 		}
 
+        GhostState* GetGhostState() const
+        {
+            return m_ghostState;
+        }
+
         GridComponent* GetGridComponent() const
         {
             return m_pGridComponent;
@@ -166,12 +183,26 @@ namespace dae
             return m_ghostType;
 		}
 
+		void CheckEnemyCollision();
 
+        void ResetGhosts();
+
+
+        void UpdateInkySprite(float deltaTime);
+        void UpdatePinkySprite(float deltaTime);
+        void UpdateBlinkySprite(float deltaTime);
+        void UpdateSueSprite(float deltaTime);
+
+        void UpdateFleeSprite(float deltaTime);
+
+		void UpdateReturnSprite(float deltaTime);
+
+        void SetSpeed(float speed = 100)
+        { 
+            m_Speed = speed;
+		}
     private:
-		void UpdateInkySprite(float deltaTime);
-		void UpdatePinkySprite(float deltaTime);
-		void UpdateBlinkySprite(float deltaTime);
-		void UpdateSueSprite(float deltaTime);
+		
 
         GhostState* m_ghostState = nullptr;
         float m_Speed = 100.0f; // Speed of the ghost

@@ -31,6 +31,9 @@ namespace dae
         void StopAllSounds() override;
         void StopSound(SoundId id) override;
 
+        void SetMuted(bool muted);
+        bool IsMuted() const;
+
         SoundSystem(const SoundSystem&) = delete;
         SoundSystem& operator=(const SoundSystem&) = delete;
         SoundSystem(SoundSystem&&) = delete;
@@ -39,6 +42,7 @@ namespace dae
     private:
         class SoundImpl;
         std::unique_ptr<SoundImpl> m_SoundImpl;
+        bool m_isMuted{ false };
     };
 
     class NullSoundSystem final : public ISoundSystem

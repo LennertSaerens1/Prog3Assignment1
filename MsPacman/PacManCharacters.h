@@ -3,6 +3,9 @@
 #include "SoundSystem.h"
 #include "GridComponent.h"
 #include "Utils.h"
+#include <functional>
+
+extern int g_globalScore;
 
 namespace dae
 {
@@ -57,7 +60,7 @@ namespace dae
         public RenderComponent
     {
 	public:
-		PacManCharacter(GameObject& gameObject, GridComponent* pGridComponent, bool isMale = false);
+		PacManCharacter(GameObject& gameObject, GridComponent* pGridComponent, std::function<void()> onDeath, bool isMale = false);
         ~PacManCharacter();
         void DecreaseLives();
 		void AddScore(int score);
@@ -97,6 +100,8 @@ namespace dae
 
         void SetState(PacManState* newState);
         void SetMovementDirection(glm::vec3 movementDir);
+        glm::vec2 GetMovementDirection() { return glm::vec2{ m_movementDirection.x, m_movementDirection.y }; };
+
         virtual void Update(float deltaTime) override;
 
         bool GetIsMale() { return m_isMale; };
@@ -108,11 +113,19 @@ namespace dae
 			return m_movementDirection;
 		}
 
+		void OnCollision(GameObject* other);
+
 		void LevelUp();
+
+		void EatGhost();
+
+		void SetEatGhostTimer(float eatGhostTimer = 6.f) { m_eatGhostTimer = eatGhostTimer; }
+
+        void SetEndScreen();
     private:
         int m_lives;
 		int m_score;
-        bool m_isMale;
+        bool m_isMale{};
 		float m_movementSpeed;
 
         glm::vec3 m_movementDirection;
@@ -126,6 +139,11 @@ namespace dae
 
         PacManCharacter* m_otherPlayer;
 
+        float m_eatGhostTimer{};
+
+        int m_ghostMultiplier{1};
+
+        std::function<void()> m_onDeath{ nullptr };
     };
 }
 

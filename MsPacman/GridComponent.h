@@ -6,9 +6,12 @@
 #include <string>
 #include "PacManCharacters.h"
 
+
 namespace dae
 {
     class PacManCharacter;
+
+	class GhostComponent;
 
     class GridComponent : public Component
     {
@@ -70,6 +73,8 @@ namespace dae
 
 		void NextLevel();
 
+        void ResetGhosts();
+
         void GetPacMan(PacManCharacter* pacMan)
         {
             m_pPacMan = pacMan;
@@ -83,6 +88,16 @@ namespace dae
         void FixedUpdate(float fixedTime) override;
         void Render(float x, float y) const override;
         void ImGuiRender() override;
+
+        void AddGhost(GhostComponent* pGhost)
+        {
+            m_pGhosts.push_back(pGhost);
+		}
+
+        std::vector<GhostComponent*> GetGhosts()
+        {
+            return m_pGhosts;
+        }
 
     private:
 		int m_Level{ 1 };
@@ -98,5 +113,7 @@ namespace dae
 		PacManCharacter* m_pPacMan{ nullptr };
 
 		float m_PowerActiveTime{ 0.0f };
+
+		std::vector<GhostComponent*> m_pGhosts; // Vector of pointers to GhostComponent objects
     };
 }

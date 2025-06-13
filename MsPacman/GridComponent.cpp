@@ -4,9 +4,13 @@
 #include <iostream>
 #include "GameObject.h"
 #include "PacManCharacters.h"
+#include "GhostComponent.h"
 #include <fstream>
 #include <stdexcept>
+#include "ServiceLocator.h"
+#include "NameInputComponent.h"
 
+constexpr bool SHOULD_DEBUG_GRID = false;
 
 namespace dae
 {
@@ -146,6 +150,39 @@ namespace dae
 
             m_pPacMan->AddScore(50);
 
+            m_pPacMan->SetEatGhostTimer(6.f);
+
+            for (auto& ghost : m_pGhosts)
+            {
+                switch (ghost->GetGhostType())
+                {
+                    case GhostType::Blinky:
+                        if (ghost->GetGhostState() == GhostState::m_movingState.get() || ghost->GetGhostState() == GhostState::m_fleeState.get())
+                        {
+                            ghost->SetGhostState(GhostState::m_fleeState.get());
+						}
+						break;
+                    case GhostType::Pinky:
+                        if (ghost->GetGhostState() == GhostState::m_pinkyMovingState.get() || ghost->GetGhostState() == GhostState::m_pinkyFleeState.get())
+                        {
+                            ghost->SetGhostState(GhostState::m_pinkyFleeState.get());
+                        }
+						break;
+                        case GhostType::Inky:
+                            if (ghost->GetGhostState() == GhostState::m_inkyMovingState.get() || ghost->GetGhostState() == GhostState::m_inkyFleeState.get())
+                            {
+                                ghost->SetGhostState(GhostState::m_inkyFleeState.get());
+                            }
+					break;
+                    case GhostType::Sue:
+                        if (ghost->GetGhostState() == GhostState::m_sueMovingState.get() || ghost->GetGhostState() == GhostState::m_sueFleeState.get())
+                        {
+                            ghost->SetGhostState(GhostState::m_sueFleeState.get());
+                        }
+						break;
+                }
+			}
+
 			m_PowerActiveTime = 5.0f;
         }
     }
@@ -159,8 +196,41 @@ namespace dae
             cell.pPowerPill = nullptr; // Clear the pointer to the power pill
 
             m_pPacMan->AddScore(50);
+
+			m_pPacMan->SetEatGhostTimer(6.f);
             
-			m_PowerActiveTime = 5.0f;
+            for (auto& ghost : m_pGhosts)
+            {
+                switch (ghost->GetGhostType())
+                {
+                case GhostType::Blinky:
+                    if (ghost->GetGhostState() == GhostState::m_movingState.get() || ghost->GetGhostState() == GhostState::m_fleeState.get())
+                    {
+                        ghost->SetGhostState(GhostState::m_fleeState.get());
+                    }
+                    break;
+                case GhostType::Pinky:
+                    if (ghost->GetGhostState() == GhostState::m_pinkyMovingState.get() || ghost->GetGhostState() == GhostState::m_pinkyFleeState.get())
+                    {
+                        ghost->SetGhostState(GhostState::m_pinkyFleeState.get());
+                    }
+                    break;
+                case GhostType::Inky:
+                    if (ghost->GetGhostState() == GhostState::m_inkyMovingState.get() || ghost->GetGhostState() == GhostState::m_inkyFleeState.get())
+                    {
+                        ghost->SetGhostState(GhostState::m_inkyFleeState.get());
+                    }
+                    break;
+                case GhostType::Sue:
+                    if (ghost->GetGhostState() == GhostState::m_sueMovingState.get() || ghost->GetGhostState() == GhostState::m_sueFleeState.get())
+                    {
+                        ghost->SetGhostState(GhostState::m_sueFleeState.get());
+                    }
+                    break;
+                }
+            }
+
+            m_PowerActiveTime = 5.0f;
         }
     }
 
@@ -299,6 +369,27 @@ namespace dae
         {
             m_PowerActiveTime -= deltaTime;
         }
+
+		//Check if all pellets and power pills are collected
+        bool allPelletsCollected = true;
+        for (const auto& row : m_Grid)
+        {
+            for (const auto& cell : row)
+            {
+                if (cell.hasPellet || cell.hasPowerPill)
+                {
+                    allPelletsCollected = false;
+                    break;
+                }
+            }
+            if (!allPelletsCollected) break;
+        }
+        if (allPelletsCollected)
+        {
+            m_pPacMan->LevelUp();
+
+            NextLevel();
+		}
     }
 
     void GridComponent::FixedUpdate(float )
@@ -308,59 +399,85 @@ namespace dae
 
     void GridComponent::Render(float x, float y) const
     {
-        // Debug rendering logic
-        const int cellSize = GetCellSize(); // Size of each grid cell in pixels
-        auto& renderer = dae::Renderer::GetInstance();
-
-        // Enable blending for transparency
-        SDL_SetRenderDrawBlendMode(renderer.GetSDLRenderer(), SDL_BLENDMODE_BLEND);
+        const int cellSize = GetCellSize(); 
 
         for (int row = 0; row < m_Height; ++row)
         {
             for (int col = 0; col < m_Width; ++col)
             {
                 const Cell& cell = m_Grid[row][col];
-                SDL_Rect rect{
-                    static_cast<int>(x + col * cellSize),
-                    static_cast<int>(y + row * cellSize),
-                    static_cast<int>(cellSize),
-                    static_cast<int>(cellSize)
-                };
-
-                // Draw the cell border
-                SDL_SetRenderDrawColor(renderer.GetSDLRenderer(), 255, 255, 255, 255); // White
-                SDL_RenderDrawRect(renderer.GetSDLRenderer(), &rect);
-
-                // Fill the cell based on its properties
-                if (cell.isWalkable)
-                {
-                    SDL_SetRenderDrawColor(renderer.GetSDLRenderer(), 0, 255, 0, 128); // Green (semi-transparent)
-                    SDL_RenderFillRect(renderer.GetSDLRenderer(), &rect);
-                }
                 if (cell.hasPowerPill)
                 {
-                    SDL_SetRenderDrawColor(renderer.GetSDLRenderer(), 255, 255, 0, 128); // Yellow (semi-transparent)
-                    SDL_RenderFillRect(renderer.GetSDLRenderer(), &rect);
-
-					if (cell.pPowerPill)
-					{
-						cell.pPowerPill->Render();
-					}
+                    if (cell.pPowerPill)
+                    {
+                        cell.pPowerPill->Render();
+                    }
                 }
                 if (cell.hasPellet)
                 {
-                    SDL_SetRenderDrawColor(renderer.GetSDLRenderer(), 255, 0, 0, 128); // Red (semi-transparent)
-                    SDL_RenderFillRect(renderer.GetSDLRenderer(), &rect);
-
                     if (cell.pPellet)
                     {
                         cell.pPellet->Render();
                     }
                 }
-                if (cell.isGate)
+
+            }
+        }
+
+        if (SHOULD_DEBUG_GRID) // Debug rendering logic
+        {
+            auto& renderer = dae::Renderer::GetInstance();
+
+            // Enable blending for transparency
+            SDL_SetRenderDrawBlendMode(renderer.GetSDLRenderer(), SDL_BLENDMODE_BLEND);
+
+            for (int row = 0; row < m_Height; ++row)
+            {
+                for (int col = 0; col < m_Width; ++col)
                 {
-                    SDL_SetRenderDrawColor(renderer.GetSDLRenderer(), 0, 0, 255, 128); // Blue (semi-transparent)
-                    SDL_RenderFillRect(renderer.GetSDLRenderer(), &rect);
+                    const Cell& cell = m_Grid[row][col];
+                    SDL_Rect rect{
+                        static_cast<int>(x + col * cellSize),
+                        static_cast<int>(y + row * cellSize),
+                        static_cast<int>(cellSize),
+                        static_cast<int>(cellSize)
+                    };
+
+                    // Draw the cell border
+                    SDL_SetRenderDrawColor(renderer.GetSDLRenderer(), 255, 255, 255, 255); // White
+                    SDL_RenderDrawRect(renderer.GetSDLRenderer(), &rect);
+
+                    // Fill the cell based on its properties
+                    if (cell.isWalkable)
+                    {
+                        SDL_SetRenderDrawColor(renderer.GetSDLRenderer(), 0, 255, 0, 128); // Green (semi-transparent)
+                        SDL_RenderFillRect(renderer.GetSDLRenderer(), &rect);
+                    }
+                    if (cell.hasPowerPill)
+                    {
+                        SDL_SetRenderDrawColor(renderer.GetSDLRenderer(), 255, 255, 0, 128); // Yellow (semi-transparent)
+                        SDL_RenderFillRect(renderer.GetSDLRenderer(), &rect);
+
+                        if (cell.pPowerPill)
+                        {
+                            cell.pPowerPill->Render();
+                        }
+                    }
+                    if (cell.hasPellet)
+                    {
+                        SDL_SetRenderDrawColor(renderer.GetSDLRenderer(), 255, 0, 0, 128); // Red (semi-transparent)
+                        SDL_RenderFillRect(renderer.GetSDLRenderer(), &rect);
+
+                        if (cell.pPellet)
+                        {
+                            cell.pPellet->Render();
+                        }
+                    }
+                    if (cell.isGate)
+                    {
+                        SDL_SetRenderDrawColor(renderer.GetSDLRenderer(), 0, 0, 255, 128); // Blue (semi-transparent)
+                        SDL_RenderFillRect(renderer.GetSDLRenderer(), &rect);
+                    }
                 }
             }
         }
@@ -522,12 +639,52 @@ namespace dae
 
 			break;
         default:
-            std::cout << "No more levels available." << std::endl;
+			m_pPacMan->SetEndScreen();
 			return; // No more levels to load
         }
 
-        
+        auto& soundSystem = dae::ServiceLocator::GetSoundSystem();
+        soundSystem.StopAllSounds();
+
+		ResetGhosts();
     }
+
+    void GridComponent::ResetGhosts()
+    {
+        for (auto& ghost : m_pGhosts)
+        {
+            utils::Vector2f middlePos{};
+            switch (ghost->GetGhostType())
+            {
+            case GhostType::Blinky:
+                ghost->SetGhostState(GhostState::m_idleState.get());
+				GhostState::m_movingState->SetShouldReset(true);
+                middlePos = GetWorldCoordinatesMiddle(13, 11);
+                ghost->SetMiddlePosition(middlePos.x, middlePos.y); // Reset to Blinky's starting position
+				break;
+            case GhostType::Pinky:
+                ghost->SetGhostState(GhostState::m_pinkyIdleState.get());
+				GhostState::m_pinkyMovingState->SetShouldReset(true);
+                middlePos = GetWorldCoordinatesMiddle(11, 14);
+
+				ghost->SetMiddlePosition(middlePos.x, middlePos.y); // Reset to Pinky's starting position
+                break;
+            case GhostType::Inky:
+				ghost->SetGhostState(GhostState::m_inkyIdleState.get());
+				GhostState::m_inkyMovingState->SetShouldReset(true);
+                middlePos = GetWorldCoordinatesMiddle(13, 14);
+
+				ghost->SetMiddlePosition(middlePos.x, middlePos.y); // Reset to Inky's starting position
+                break;
+	        case GhostType::Sue:
+				ghost->SetGhostState(GhostState::m_sueIdleState.get());
+				GhostState::m_sueMovingState->SetShouldReset(true);
+                middlePos = GetWorldCoordinatesMiddle(15, 14);
+				ghost->SetMiddlePosition(middlePos.x, middlePos.y); // Reset to Sue's starting position
+                break;
+            }
+        }
+	}
 
     void GridComponent::ImGuiRender()
     {

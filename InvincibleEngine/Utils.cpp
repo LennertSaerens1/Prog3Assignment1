@@ -17,9 +17,11 @@ namespace utils
         if (inFile.is_open())
         {
             int score;
+            std::string nameDummy; // To read and discard names
             while (inFile >> score)
             {
                 highScores.push_back(score);
+                inFile >> nameDummy; // Read and discard the name
             }
             inFile.close();
         }
@@ -46,7 +48,7 @@ namespace utils
         {
             for (int score : highScores)
             {
-                outFile << score << std::endl;
+                outFile << score << " AAA" << std::endl; // Default name for backward compatibility
             }
             outFile.close();
         }
@@ -56,29 +58,83 @@ namespace utils
         }
     }
 
-    void SaveHighScore(int highScore)
+    void SaveHighScoresWithNames(const std::vector<HighScoreEntry>& highScores)
     {
-        std::vector<int> highScores = LoadAllHighScores();
+        std::ofstream outFile(HIGH_SCORE_FILE);
+        if (outFile.is_open())
+        {
+            for (const auto& entry : highScores)
+            {
+                outFile << entry.score << " " << entry.name[0] << entry.name[1] << entry.name[2] << std::endl;
+            }
+            outFile.close();
+        }
+        else
+        {
+            std::cerr << "Error: Unable to open " << HIGH_SCORE_FILE << " for writing." << std::endl;
+        }
+    }
 
-        // If we already have MAX_HIGH_SCORES and the new score is lower than all of them, we don't need to add it
-        if (highScores.size() >= MAX_HIGH_SCORES && highScore <= highScores.back())
+    std::vector<HighScoreEntry> LoadAllHighScoreEntries()
+    {
+        std::vector<HighScoreEntry> entries;
+        std::ifstream inFile(HIGH_SCORE_FILE);
+
+        if (inFile.is_open())
+        {
+            int score;
+            std::string nameStr;
+            while (inFile >> score >> nameStr)
+            {
+                char name[3] = { 'A', 'A', 'A' };
+                if (nameStr.length() >= 3) {
+                    name[0] = nameStr[0];
+                    name[1] = nameStr[1];
+                    name[2] = nameStr[2];
+                }
+                entries.push_back(HighScoreEntry(score, name));
+            }
+            inFile.close();
+        }
+        else
+        {
+            std::cerr << "Error: Unable to open " << HIGH_SCORE_FILE << " for reading." << std::endl;
+        }
+
+        std::sort(entries.begin(), entries.end(),
+            [](const HighScoreEntry& a, const HighScoreEntry& b) { return a.score > b.score; });
+
+        if (entries.size() > MAX_HIGH_SCORES)
+        {
+            entries.resize(MAX_HIGH_SCORES);
+        }
+
+        return entries;
+    }
+
+    void SaveHighScore(int highScore, const char name[3])
+    {
+        std::vector<HighScoreEntry> entries = LoadAllHighScoreEntries();
+
+        // Check if we need to add the new score
+        if (entries.size() >= MAX_HIGH_SCORES && highScore <= entries.back().score)
         {
             return;
         }
 
-        // Insert the new score
-        highScores.push_back(highScore);
+        // Add the new entry
+        entries.push_back(HighScoreEntry(highScore, name));
 
-        // Sort in descending order
-        std::sort(highScores.begin(), highScores.end(), std::greater<int>());
+        // Sort and resize
+        std::sort(entries.begin(), entries.end(),
+            [](const HighScoreEntry& a, const HighScoreEntry& b) { return a.score > b.score; });
 
-        // Truncate to MAX_HIGH_SCORES if needed
-        if (highScores.size() > MAX_HIGH_SCORES)
+        if (entries.size() > MAX_HIGH_SCORES)
         {
-            highScores.resize(MAX_HIGH_SCORES);
+            entries.resize(MAX_HIGH_SCORES);
         }
 
-        SaveHighScores(highScores);
+        SaveHighScoresWithNames(entries);
     }
 
     int LoadHighScore()
